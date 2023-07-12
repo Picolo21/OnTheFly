@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using OnTheFly.Models.DTO;
 
-namespace OnTheFly.AirCraftService.Services
+namespace OnTheFly.AirCraftService.Services.v1
 {
     public class CompanyService
     {

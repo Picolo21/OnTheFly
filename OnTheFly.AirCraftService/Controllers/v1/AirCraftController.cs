@@ -5,7 +5,7 @@ using OnTheFly.Connections;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 
-namespace OnTheFly.AirCraftService.Controllers
+namespace OnTheFly.AirCraftService.Controllers.v1
 {
     [Route("api/[controller]")]
     [ApiController]

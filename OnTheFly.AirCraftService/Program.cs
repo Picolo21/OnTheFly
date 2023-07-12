@@ -1,4 +1,4 @@
-using OnTheFly.AirCraftService.Services;
+using OnTheFly.AirCraftService.Services.v1;
 using OnTheFly.Connections;
 
 var builder = WebApplication.CreateBuilder(args);
