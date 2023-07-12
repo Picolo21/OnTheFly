@@ -1,8 +1,7 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace OnTheFly.Models
 {
@@ -20,7 +19,7 @@ namespace OnTheFly.Models
 
         public static bool RABValidation(string rab)
         {
-            rab=rab.ToLower();
+            rab = rab.ToLower();
             char[] aceptedLetters = new char[] { 'p', 'r', 's', 't', 'u' };
             string[] unaceptedPrefixes = new string[] { "sos", "xxx", "pan", "ttt", "vfr", "ifr", "vmc", "imc", "tnc", "pqp", "pnc"};
 

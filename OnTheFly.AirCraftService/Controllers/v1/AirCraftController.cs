@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using OnTheFly.AirCraftService.Services;
+using OnTheFly.AirCraftService.Services.v1;
 using OnTheFly.Connections;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 
 namespace OnTheFly.AirCraftService.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/aircraft")]
     [ApiController]
     public class AirCraftController : ControllerBase
     {
-        private AirCraftConnection _airCraftConnection;
-        private CompanyService _companyService;
+        private readonly AirCraftConnection _airCraftConnection;
+        private readonly CompanyService _companyService;
 
         public AirCraftController(AirCraftConnection aircraftConnection, CompanyService companyService)
         {
@@ -21,7 +21,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<AirCraft>>> GetAirCraft()
+        public async Task<ActionResult<List<AirCraft>>> GetAirCraftAsync()
         {
             if (_airCraftConnection.FindAll().Count == 0)
             {
@@ -30,14 +30,15 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return _airCraftConnection.FindAll();
         }
 
-        [HttpGet("{RAB}")]
-        public async Task<ActionResult<AirCraft>> GetAirCraftByRAB(string RAB)
+        [Route("{RAB}")]
+        [HttpGet]
+        public async Task<ActionResult<AirCraft>> GetAirCraftByRABAsync(string RAB)
         {
             return _airCraftConnection.FindByRAB(RAB);
         }
 
         [HttpPost]
-        public async Task<ActionResult<string>> PostAirCraft(AirCraftDTO airCraftDTO)
+        public async Task<ActionResult<string>> CreateAirCraftAsync(AirCraftDTO airCraftDTO)
         {
             #region company
             airCraftDTO.Company = airCraftDTO.Company.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
@@ -101,8 +102,9 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Erro ao inserir avião!");
         }
 
-        [HttpPost("/SendToDeleted/{RAB}")]
-        public async Task<ActionResult> Delete(string RAB)
+        [Route("{RAB}")]
+        [HttpPost]
+        public async Task<ActionResult> DeleteAsync(string RAB)
         {
             #region rab
             RAB = RAB.Replace("-", "");
@@ -120,8 +122,9 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Erro ao deletar avião");
         }
 
-        [HttpPost("/UndeleteAirCraft/{RAB}")]
-        public async Task<ActionResult> UndeleteAirCraft(string RAB)
+        [Route("UndeleteAirCraft/{RAB}")]
+        [HttpPost]
+        public async Task<ActionResult> UndeleteAirCraftAsync(string RAB)
         {
             #region rab
             RAB = RAB.Replace("-", "");
@@ -139,8 +142,9 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Erro ao retirar avião da lista dos deletados");
         }
 
-        [HttpPut("/UpdateCapacity/{RAB},{capacity}")]
-        public async Task<ActionResult<string>> UpdateCapacity(string RAB, int capacity)
+        [Route("UpdateCapacity/{RAB},{capacity}")]
+        [HttpPut]
+        public async Task<ActionResult<string>> UpdateCapacityAsync(string RAB, int capacity)
         {
             #region rab
             RAB = RAB.Replace("-", "");
@@ -161,8 +165,9 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Não foi possível atualizar a capacidade do avião");
         }
 
-        [HttpPut("/UpdateDtLastFlight/{RAB}")]
-        public async Task<ActionResult<string>> UpdateDtLastFlight(string RAB, DateDTO dtLastFlight)
+        [Route("{RAB}")]
+        [HttpPut]
+        public async Task<ActionResult<string>> UpdateDtLastFlightAsync(string RAB, DateDTO dtLastFlight)
         {
             #region Date
             DateTime date;

@@ -1,12 +1,12 @@
 ﻿using MongoDB.Driver;
 using OnTheFly.Models;
-using OnTheFly.Models.DTO;
 
 namespace OnTheFly.Connections
 {
     public class AirCraftConnection
     {
         private readonly IMongoDatabase _database;
+
         public AirCraftConnection()
         {
             var client = new MongoClient("mongodb://localhost:27017");
