@@ -1,8 +1,8 @@
-﻿using OnTheFly.AirportService.Services;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using OnTheFly.AirportService.Services;
 using OnTheFly.Connections;
 using OnTheFly.Models;
+using System.Collections.Generic;
 
 namespace OnTheFly.AirportService.Controllers.v1
 {
