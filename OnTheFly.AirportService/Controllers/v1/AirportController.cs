@@ -6,20 +6,21 @@ using OnTheFly.Models;
 
 namespace OnTheFly.AirportService.Controllers.v1
 {
-    [Route("[controller]")]
+    [Route("api/v1/airport")]
     [ApiController]
 
     public class AirportController : ControllerBase
     {
         private readonly AirportConnection _airport;
         private readonly StateConnection _state;
+
         public AirportController(AirportConnection airport, StateConnection state)
         {
             _airport = airport;
             _state = state;
         }
 
-        [HttpGet("/ByIATA/{iata}", Name = "GetAirportIata")]
+        [HttpGet("{iata}", Name = "GetAllAirport")]
         public ActionResult<Airport> Get(string iata)
         {
             Airport airport = _airport.Get(iata);
@@ -33,7 +34,7 @@ namespace OnTheFly.AirportService.Controllers.v1
             return airport;
         }
 
-        [HttpGet("/ByState/{state}", Name = "GetAirportState")]
+        [HttpGet("{state}", Name = "GetAirportState")]
         public ActionResult<List<Airport>> GetByState(string state)
         {
             var airport = _airport.GetByState(state);
@@ -44,7 +45,7 @@ namespace OnTheFly.AirportService.Controllers.v1
             return airport;
         }
 
-        [HttpGet("/ByCityName/{city}", Name = "GetAirportCityName")]
+        [HttpGet("{city}", Name = "GetAirportByCity")]
         public ActionResult<List<Airport>> GetByCityName(string city)
         {
             var airport = _airport.GetByCityName(city);
@@ -55,7 +56,7 @@ namespace OnTheFly.AirportService.Controllers.v1
             return airport;
         }
 
-        [HttpGet("/ByCountry/{country}", Name = "GetAirportCountry")]
+        [HttpGet("{country}", Name = "GetAirportByCountry")]
         public ActionResult<List<Airport>> GetByCountry(string country)
         {
             var airport = _airport.GetByCountry(country);
