@@ -20,7 +20,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             _companyService = companyService;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "Get All Aircraft")]
         public async Task<ActionResult<List<AirCraft>>> GetAirCraftAsync()
         {
             if (_airCraftConnection.FindAll().Count == 0)
@@ -30,14 +30,13 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return _airCraftConnection.FindAll();
         }
 
-        [Route("{RAB}")]
-        [HttpGet]
+        [HttpGet("{rab}", Name = "Get Aircraft by RAB")]
         public async Task<ActionResult<AirCraft>> GetAirCraftByRABAsync(string RAB)
         {
             return _airCraftConnection.FindByRAB(RAB);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "Create Aircraft")]
         public async Task<ActionResult<string>> CreateAirCraftAsync(AirCraftDTO airCraftDTO)
         {
             #region company
@@ -102,8 +101,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Erro ao inserir avião!");
         }
 
-        [Route("{RAB}")]
-        [HttpPost]
+        [HttpPost("{rab}", Name = "Delete Aircraft")]
         public async Task<ActionResult> DeleteAsync(string RAB)
         {
             #region rab
@@ -122,8 +120,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Erro ao deletar avião");
         }
 
-        [Route("UndeleteAirCraft/{RAB}")]
-        [HttpPost]
+        [HttpPost("UndeleteAirCraft/{RAB}", Name = "Undelete Aircraft")]
         public async Task<ActionResult> UndeleteAirCraftAsync(string RAB)
         {
             #region rab
@@ -142,8 +139,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Erro ao retirar avião da lista dos deletados");
         }
 
-        [Route("UpdateCapacity/{RAB},{capacity}")]
-        [HttpPut]
+        [HttpPut("UpdateCapacity/{RAB},{capacity}", Name = "Update Capacity")]
         public async Task<ActionResult<string>> UpdateCapacityAsync(string RAB, int capacity)
         {
             #region rab
@@ -165,8 +161,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             return BadRequest("Não foi possível atualizar a capacidade do avião");
         }
 
-        [Route("{RAB}")]
-        [HttpPut]
+        [HttpPut("{RAB}", Name = "Update Date Last Flight")]
         public async Task<ActionResult<string>> UpdateDtLastFlightAsync(string RAB, DateDTO dtLastFlight)
         {
             #region Date
