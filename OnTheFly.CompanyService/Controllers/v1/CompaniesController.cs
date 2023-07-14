@@ -19,7 +19,10 @@ namespace OnTheFly.CompanyService.Controllers.v1
         private readonly PostOfficesService _postOfficeService;
         private readonly AircraftService _aircraftService;
 
-        public CompaniesController(CompanyConnection companyConnection, PostOfficesService postOfficeService, AircraftService aircraftService)
+        public CompaniesController(
+            CompanyConnection companyConnection,
+            PostOfficesService postOfficeService,
+            AircraftService aircraftService)
         {
             _companyConnection = companyConnection;
             _postOfficeService = postOfficeService;
