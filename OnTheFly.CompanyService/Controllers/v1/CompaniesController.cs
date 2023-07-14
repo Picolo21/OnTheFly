@@ -1,17 +1,15 @@
-﻿using System.Collections.Generic;
-using DocumentValidator;
+﻿using DocumentValidator;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using OnTheFly.CompanyService.Services.v1;
 using OnTheFly.Connections;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 using OnTheFly.PostOfficeService;
-using System.IO;
-using OnTheFly.CompanyService.Services.v1;
 
 namespace OnTheFly.CompanyService.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/companies")]
     [ApiController]
     public class CompaniesController : ControllerBase
     {
@@ -29,8 +27,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             _aircraftService = aircraftService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<Company>>> GetCompany()
+        [HttpGet(Name = "Get All Companies")]
+        public async Task<ActionResult<List<Company>>> GetCompanyAsync()
         {
             if (_companyConnection.FindAll().Count == 0)
             {
@@ -39,8 +37,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return _companyConnection.FindAll();
         }
 
-        [HttpGet("{cnpj}")]
-        public async Task<ActionResult<Company>> GetCompanyByCNPJ(string cnpj)
+        [HttpGet("{cnpj}", Name = "Get Company by CNPJ")]
+        public async Task<ActionResult<Company>> GetCompanyByCnpjAsync(string cnpj)
         {
             cnpj = cnpj.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
             if (!CnpjValidation.Validate(cnpj))
@@ -52,8 +50,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return _companyConnection.FindByCnpj(cnpj);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<string>> PostCompany(CompanyDTO companyDTO)
+        [HttpPost(Name = "Create Company")]
+        public async Task<ActionResult<string>> CreateCompanyAsync(CompanyDTO companyDTO)
         {
             #region Company
             companyDTO.Cnpj = companyDTO.Cnpj.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
@@ -128,8 +126,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
 
         }
 
-        [HttpPost("/SendToDeleted/{CNPJ}")]
-        public ActionResult Delete(string CNPJ)
+        [HttpPost("SendToDeleted/{CNPJ}", Name = "Delete Company")]
+        public async Task<ActionResult> DeleteAsync(string CNPJ)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
@@ -149,8 +147,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return BadRequest("companhia inexistente");
         }
 
-        [HttpPost("/SendToRestricted/{CNPJ}")]
-        public ActionResult Restrict(string CNPJ)
+        [HttpPost("SendToRestricted/{CNPJ}", Name = "Restrict Company")]
+        public async Task<ActionResult> RestrictAsync(string CNPJ)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
@@ -170,8 +168,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return BadRequest("Companhia inexistente");
         }
 
-        [HttpPost("/UnrestrictCompany/{CNPJ}")]
-        public ActionResult Unrestrict(string CNPJ)
+        [HttpPost("UnrestrictCompany/{CNPJ}", Name = "Unrestrict Company")]
+        public async Task<ActionResult> UnrestrictAsync(string CNPJ)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
@@ -191,8 +189,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return BadRequest("Companhia nao esta na lista de restritos");
         }
 
-        [HttpPost("/UndeleteCompany/{CNPJ}")]
-        public ActionResult UndeleteCompany(string CNPJ)
+        [HttpPost("UndeleteCompany/{CNPJ}", Name = "Undelete Company")]
+        public async Task<ActionResult> UndeleteCompanyAsync(string CNPJ)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
@@ -212,8 +210,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return BadRequest("Companhia nao esta na lista de deletados");
         }
 
-        [HttpPut("/UpdateNameOPT/{CNPJ},{NameOPT}")]
-        public ActionResult UpdateName(string CNPJ, string NameOPT)
+        [HttpPut("UpdateNameOPT/{CNPJ},{NameOPT}", Name = "Update Name")]
+        public async Task<ActionResult> UpdateNameAsync(string CNPJ, string NameOPT)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
@@ -236,8 +234,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return BadRequest("Companhia nao esta na lista");
         }
 
-        [HttpPut("/UpdateAddress/{CNPJ}")]
-        public ActionResult UpdateAddress(string CNPJ, Address address)
+        [HttpPut("UpdateAddress/{CNPJ}", Name = "Update Address")]
+        public async Task<ActionResult> UpdateAddressAsync(string CNPJ, Address address)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
@@ -281,8 +279,8 @@ namespace OnTheFly.CompanyService.Controllers.v1
             return BadRequest("Companhia nao esta na lista");
         }
 
-        [HttpPut("/ChangeStatus/{CNPJ}")]
-        public ActionResult ChangeStatus(string CNPJ)
+        [HttpPut("ChangeStatus/{CNPJ}", Name = "Change Status")]
+        public async Task<ActionResult> ChangeStatusAsync(string CNPJ)
         {
             if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
