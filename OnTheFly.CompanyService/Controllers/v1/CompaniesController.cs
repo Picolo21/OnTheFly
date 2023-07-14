@@ -2,14 +2,14 @@
 using DocumentValidator;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using OnTheFly.CompanyService.Services;
 using OnTheFly.Connections;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 using OnTheFly.PostOfficeService;
 using System.IO;
+using OnTheFly.CompanyService.Services.v1;
 
-namespace OnTheFly.CompanyService.Controllers
+namespace OnTheFly.CompanyService.Controllers.v1
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -58,10 +58,10 @@ namespace OnTheFly.CompanyService.Controllers
             if (!CnpjValidation.Validate(companyDTO.Cnpj))
                 return BadRequest("Cnpj Invalido");
 
-            if ((companyDTO.Name == "") || (companyDTO.Name == "string"))
+            if (companyDTO.Name == "" || companyDTO.Name == "string")
                 return BadRequest("A razão social da companhia não foi informada! Por favor, insira um nome correspondente a razão social da companhia");
 
-            if ((companyDTO.NameOPT == "") || (companyDTO.NameOPT == "string"))
+            if (companyDTO.NameOPT == "" || companyDTO.NameOPT == "string")
                 companyDTO.NameOPT = companyDTO.Name;
             #endregion
 
@@ -170,7 +170,7 @@ namespace OnTheFly.CompanyService.Controllers
         [HttpPost("/UnrestrictCompany/{CNPJ}")]
         public ActionResult Unrestrict(string CNPJ)
         {
-            if(CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
                 return BadRequest("CNPJ não informado!");
 
             CNPJ = CNPJ.Replace("%2F", "/");
@@ -269,7 +269,7 @@ namespace OnTheFly.CompanyService.Controllers
             if (company != null)
             {
                 company.Address = address;
-                if (_companyConnection.Update(CNPJ, company)!=null)
+                if (_companyConnection.Update(CNPJ, company) != null)
                     return Ok("Endereço da Companhia atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o endereço da Companhia");

@@ -2,7 +2,7 @@
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 using System.Text;
-namespace OnTheFly.CompanyService.Services
+namespace OnTheFly.CompanyService.Services.v1
 {
     public class AircraftService
     {

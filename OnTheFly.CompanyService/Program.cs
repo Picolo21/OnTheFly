@@ -1,4 +1,4 @@
-using OnTheFly.CompanyService.Services;
+using OnTheFly.CompanyService.Services.v1;
 using OnTheFly.Connections;
 using OnTheFly.PostOfficeService;
 
