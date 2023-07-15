@@ -74,13 +74,13 @@ namespace OnTheFly.FlightService.Controllers.v1
                 return BadRequest("Data invalida");
             }
             // Verificar se airport existe e é válido
-            Airport? airport = _airport.GetValidDestiny(flightDTO.IATA).Result;
+            Airport? airport = _airport.GetValidDestinyAsync(flightDTO.IATA).Result;
             if (airport == null) return NotFound("Aeroporto não encotrado");
             if (airport.Country == null || airport.Country == "") NotFound("País de origem do aeroporto não encontrado");
             if (airport.Country != "BR") return Unauthorized("Não são autorizados voos fora do Brasil");
 
             // Verificar se aircraft existe e é válido
-            AirCraft? aircraft = _aircraft.GetAircraft(flightDTO.RAB).Result;
+            AirCraft? aircraft = _aircraft.GetAircraftAsync(flightDTO.RAB).Result;
             if (aircraft == null) return NotFound("Avião não encontrado");
             if (aircraft.Company == null) return NotFound("Companhia de avião não encontrada");
             if (aircraft.Company.Status == false) return Unauthorized("Companhia não autorizada para voos");
@@ -97,7 +97,7 @@ namespace OnTheFly.FlightService.Controllers.v1
                 return BadRequest("voo nao pode se repetir");
 
 
-            if (_aircraft.UpdateAircraft(aircraft.RAB, date) == null) return BadRequest("Impossível atualizar última data de voo do avião");
+            if (_aircraft.UpdateAircraftAsync(aircraft.RAB, date) == null) return BadRequest("Impossível atualizar última data de voo do avião");
 
             // Inserção de flight
             Flight? flight = _flight.Insert(flightDTO, aircraft, airport, date);

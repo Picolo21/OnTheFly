@@ -9,15 +9,15 @@ using OnTheFly.PostOfficeService;
 
 namespace OnTheFly.CompanyService.Controllers.v1
 {
-    [Route("api/v1/companies")]
+    [Route("api/v1/company")]
     [ApiController]
-    public class CompaniesController : ControllerBase
+    public class CompanyController : ControllerBase
     {
         private readonly CompanyConnection _companyConnection;
         private readonly PostOfficesService _postOfficeService;
         private readonly AircraftService _aircraftService;
 
-        public CompaniesController(
+        public CompanyController(
             CompanyConnection companyConnection,
             PostOfficesService postOfficeService,
             AircraftService aircraftService)
