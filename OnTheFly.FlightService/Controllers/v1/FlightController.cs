@@ -2,22 +2,22 @@
 using MongoDB.Bson;
 using Newtonsoft.Json;
 using OnTheFly.Connections;
-using OnTheFly.FlightService.Services;
+using OnTheFly.FlightService.Services.v1;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 using ThirdParty.Json.LitJson;
 
-namespace OnTheFly.FlightService.Controllers
+namespace OnTheFly.FlightService.Controllers.v1
 {
     [Route("api/[controller]")]
     [ApiController]
     public class FlightController : ControllerBase
     {
         private FlightConnection _flight;
-        private Services.AirportService _airport;
-        private Services.AircraftService _aircraft;
+        private Services.v1.AirportService _airport;
+        private AircraftService _aircraft;
 
-        public FlightController(FlightConnection flight, Services.AirportService airport, AircraftService aircraft)
+        public FlightController(FlightConnection flight, Services.v1.AirportService airport, AircraftService aircraft)
         {
             _flight = flight;
             _airport = airport;

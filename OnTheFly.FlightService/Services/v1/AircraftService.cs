@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using OnTheFly.Models;
 
-namespace OnTheFly.FlightService.Services
+namespace OnTheFly.FlightService.Services.v1
 {
     public class AircraftService
     {

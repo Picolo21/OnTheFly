@@ -1,5 +1,5 @@
 using OnTheFly.Connections;
-using OnTheFly.FlightService.Services;
+using OnTheFly.FlightService.Services.v1;
 
 var builder = WebApplication.CreateBuilder(args);
 
