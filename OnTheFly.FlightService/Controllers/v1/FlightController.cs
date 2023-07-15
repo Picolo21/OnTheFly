@@ -5,11 +5,10 @@ using OnTheFly.Connections;
 using OnTheFly.FlightService.Services.v1;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
-using ThirdParty.Json.LitJson;
 
 namespace OnTheFly.FlightService.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/flight")]
     [ApiController]
     public class FlightController : ControllerBase
     {
@@ -17,14 +16,17 @@ namespace OnTheFly.FlightService.Controllers.v1
         private Services.v1.AirportService _airport;
         private AircraftService _aircraft;
 
-        public FlightController(FlightConnection flight, Services.v1.AirportService airport, AircraftService aircraft)
+        public FlightController(
+            FlightConnection flight,
+            Services.v1.AirportService airport,
+            AircraftService aircraft)
         {
             _flight = flight;
             _airport = airport;
             _aircraft = aircraft;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "Get All Flights")]
         public ActionResult<List<Flight>> GetAll()
         {
             List<Flight> flights = _flight.FindAll();
@@ -58,7 +60,7 @@ namespace OnTheFly.FlightService.Controllers.v1
             return JsonConvert.SerializeObject(flight, Formatting.Indented);
         }
 
-        [HttpPost]
+        [HttpPost(Name = "Create Flight")]
         public ActionResult Insert(FlightDTO flightDTO)
         {
             if (flightDTO == null) return BadRequest("Nenhum voo inserido");
