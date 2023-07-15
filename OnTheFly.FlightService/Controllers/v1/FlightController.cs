@@ -61,7 +61,7 @@ namespace OnTheFly.FlightService.Controllers.v1
         }
 
         [HttpPost(Name = "Create Flight")]
-        public ActionResult Insert(FlightDTO flightDTO)
+        public ActionResult CreateFlight(FlightDTO flightDTO)
         {
             if (flightDTO == null) return BadRequest("Nenhum voo inserido");
             DateTime date;
@@ -106,7 +106,26 @@ namespace OnTheFly.FlightService.Controllers.v1
             return Ok("Voo armazenado no banco com sucesso!");
         }
 
-        [HttpPut("/UpdateStatus/{IATA}, {RAB}, {departure}")]
+        [HttpPost("SendToDeleted/{IATA}, {RAB}, {departure}")]
+        public ActionResult DeleteFlight(string IATA, string RAB, string departure)
+        {
+            if (IATA == null || RAB == null || departure == null) return NoContent();
+
+            bool isDate = DateTime.TryParse(departure, out DateTime departureDT);
+            if (!isDate) return BadRequest("Formato de data não reconhecido");
+
+            if (departureDT.Hour != 12)
+                departureDT = departureDT.AddHours(9);
+
+            BsonDateTime bsonDate = BsonDateTime.Create(departureDT);
+
+            if (!_flight.Delete(IATA, RAB, departureDT))
+                return BadRequest("Não foi possível deletar o voo");
+
+            return Ok("Voo deletado com sucesso!");
+        }
+
+        [HttpPut("UpdateStatus/{IATA}, {RAB}, {departure}")]
         public ActionResult UpdateStatus(string IATA, string RAB, string departure)
         {
             bool isDate = DateTime.TryParse(departure, out DateTime departureDT);
@@ -126,7 +145,7 @@ namespace OnTheFly.FlightService.Controllers.v1
             return Ok("Voo atualizado com sucesso!");
         }
 
-        [HttpPut("/UpdateSales/{IATA}, {RAB}, {departure}, {salesNumber}")]
+        [HttpPut("UpdateSales/{IATA}, {RAB}, {departure}, {salesNumber}")]
         public ActionResult UpdateSales(string IATA, string RAB, string departure, int salesNumber)
         {
             bool isDate = DateTime.TryParse(departure, out DateTime departureDT);
@@ -144,25 +163,6 @@ namespace OnTheFly.FlightService.Controllers.v1
                 return BadRequest("Não foi possível atualizar o número de vendas do voo");
 
             return Ok("Voo atualizado com sucesso!");
-        }
-
-        [HttpPost("/SendToDeleted/{IATA}, {RAB}, {departure}")]
-        public ActionResult Delete(string IATA, string RAB, string departure)
-        {
-            if (IATA == null || RAB == null || departure == null) return NoContent();
-
-            bool isDate = DateTime.TryParse(departure, out DateTime departureDT);
-            if (!isDate) return BadRequest("Formato de data não reconhecido");
-
-            if (departureDT.Hour != 12)
-                departureDT = departureDT.AddHours(9);
-
-            BsonDateTime bsonDate = BsonDateTime.Create(departureDT);
-
-            if (!_flight.Delete(IATA, RAB, departureDT))
-                return BadRequest("Não foi possível deletar o voo");
-
-            return Ok("Voo deletado com sucesso!");
         }
     }
 }
