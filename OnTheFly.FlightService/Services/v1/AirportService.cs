@@ -7,7 +7,7 @@ namespace OnTheFly.FlightService.Services.v1
     {
         private HttpClient _httpClient = new HttpClient();
 
-        public async Task<Airport> GetValidDestiny(string IATA)
+        public async Task<Airport> GetValidDestinyAsync(string IATA)
         {
             HttpResponseMessage res = await _httpClient.GetAsync("https://localhost:44366/ByIATA/" + IATA);
             if (!res.IsSuccessStatusCode) return new Airport();
