@@ -8,7 +8,7 @@ namespace OnTheFly.FlightService.Services.v1
     {
         private HttpClient _httpClient = new HttpClient();
 
-        public async Task<AirCraft?> GetAircraft(string RAB)
+        public async Task<AirCraft?> GetAircraftAsync(string RAB)
         {
             HttpResponseMessage res = await _httpClient.GetAsync("https://localhost:5000/api/AirCraft/" + RAB);
             if (!res.IsSuccessStatusCode) return null;
@@ -19,7 +19,7 @@ namespace OnTheFly.FlightService.Services.v1
             return result;
         }
 
-        public async Task<AirCraft?> UpdateAircraft(string RAB, DateTime date)
+        public async Task<AirCraft?> UpdateAircraftAsync(string RAB, DateTime date)
         {
             // Configurando json para formatação de data no padrão UTC
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
