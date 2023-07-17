@@ -9,7 +9,7 @@ using OnTheFly.PostOfficeService;
 
 namespace OnTheFly.CompanyService.Controllers.v1
 {
-    [Route("api/v1/company")]
+    [Route("api/v1/companies")]
     [ApiController]
     public class CompanyController : ControllerBase
     {

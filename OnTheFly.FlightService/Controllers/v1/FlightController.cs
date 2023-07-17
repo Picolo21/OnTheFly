@@ -8,7 +8,7 @@ using OnTheFly.Models.DTO;
 
 namespace OnTheFly.FlightService.Controllers.v1
 {
-    [Route("api/v1/flight")]
+    [Route("api/v1/flights")]
     [ApiController]
     public class FlightController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace OnTheFly.FlightService.Controllers.v1
         }
 
         [HttpGet(Name = "Get All Flights")]
-        public ActionResult<List<Flight>> GetAll()
+        public ActionResult<List<Flight>> ReadAll()
         {
             List<Flight> flights = _flight.FindAll();
 
@@ -37,7 +37,7 @@ namespace OnTheFly.FlightService.Controllers.v1
             return flights;
         }
 
-        [HttpGet("{IATA},{RAB},{departure}")]
+        [HttpGet("{iata},{rab},{departure}")]
         public ActionResult<string> Get(string IATA, string RAB, string departure)
         {
             var data = departure.Split('-');
@@ -106,7 +106,7 @@ namespace OnTheFly.FlightService.Controllers.v1
             return Ok("Voo armazenado no banco com sucesso!");
         }
 
-        [HttpPost("SendToDeleted/{IATA}, {RAB}, {departure}")]
+        [HttpPost("sendtodeleted/{iata}, {rab}, {departure}")]
         public ActionResult DeleteFlight(string IATA, string RAB, string departure)
         {
             if (IATA == null || RAB == null || departure == null) return NoContent();
@@ -125,7 +125,7 @@ namespace OnTheFly.FlightService.Controllers.v1
             return Ok("Voo deletado com sucesso!");
         }
 
-        [HttpPut("UpdateStatus/{IATA}, {RAB}, {departure}")]
+        [HttpPut("updatestatus/{iata}, {rab}, {departure}")]
         public ActionResult UpdateStatus(string IATA, string RAB, string departure)
         {
             bool isDate = DateTime.TryParse(departure, out DateTime departureDT);
@@ -145,7 +145,7 @@ namespace OnTheFly.FlightService.Controllers.v1
             return Ok("Voo atualizado com sucesso!");
         }
 
-        [HttpPut("UpdateSales/{IATA}, {RAB}, {departure}, {salesNumber}")]
+        [HttpPut("updatesales/{iata}, {rab}, {departure}, {salesnumber}")]
         public ActionResult UpdateSales(string IATA, string RAB, string departure, int salesNumber)
         {
             bool isDate = DateTime.TryParse(departure, out DateTime departureDT);

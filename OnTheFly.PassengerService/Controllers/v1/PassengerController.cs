@@ -7,7 +7,7 @@ using OnTheFly.PostOfficeService;
 
 namespace OnTheFly.PassengerService.Controllers.v1
 {
-    [Route("api/v1/passenger")]
+    [Route("api/v1/passengers")]
     [ApiController]
     public class PassengerController : ControllerBase
     {

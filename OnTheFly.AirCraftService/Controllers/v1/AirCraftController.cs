@@ -7,7 +7,7 @@ using OnTheFly.Models.DTO;
 
 namespace OnTheFly.AirCraftService.Controllers.v1
 {
-    [Route("api/v1/aircraft")]
+    [Route("api/v1/aircrafts")]
     [ApiController]
     public class AirCraftController : ControllerBase
     {

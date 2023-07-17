@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace OnTheFly.AirportService.Controllers.v1
 {
-    [Route("api/v1/airport")]
+    [Route("api/v1/airports")]
     [ApiController]
 
     public class AirportController : ControllerBase
