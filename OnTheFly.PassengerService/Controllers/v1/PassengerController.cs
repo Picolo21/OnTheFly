@@ -8,7 +8,7 @@ using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 using OnTheFly.PostOfficeService;
 
-namespace OnTheFly.PassengerService.Controllers
+namespace OnTheFly.PassengerService.Controllers.v1
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -22,12 +22,12 @@ namespace OnTheFly.PassengerService.Controllers
             _passengerConnection = passengerConnection;
             _postOfficeService = postOfficeService;
         }
-       
+
         [HttpGet]
         public ActionResult<List<Passenger>> GetAll()
         {
             var passengers = _passengerConnection.FindAll();
-            if (passengers.Count==0)
+            if (passengers.Count == 0)
                 return NotFound("Nenhum passageiro encontrado");
             return passengers;
         }
@@ -35,14 +35,14 @@ namespace OnTheFly.PassengerService.Controllers
         [HttpGet("{CPF}", Name = "GetCPF")]
         public ActionResult<Passenger> GetBycpf(string CPF)
         {
-            if (CPF is null || CPF.Equals("string") || CPF=="") 
+            if (CPF is null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
 
             CPF = CPF.Replace(".", "").Replace("-", "");
             if (Passenger.ValidateCPF(CPF) == false)
                 return BadRequest("CPF invalido");
 
-            var passenger= _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(CPF);
 
             if (passenger == null)
                 return NotFound("Passageiro com este cpf nao encontrado");
@@ -53,12 +53,12 @@ namespace OnTheFly.PassengerService.Controllers
         [HttpPost]
         public ActionResult Insert(PassengerDTO passengerdto)
         {
-            if (passengerdto.CPF == null || passengerdto.CPF.Equals("string") || passengerdto.CPF=="") 
+            if (passengerdto.CPF == null || passengerdto.CPF.Equals("string") || passengerdto.CPF == "")
                 return BadRequest("CPF não informado!");
 
             var cpf = passengerdto.CPF.Replace(".", "").Replace("-", "");
 
-            if (Passenger.ValidateCPF(cpf)==false)
+            if (Passenger.ValidateCPF(cpf) == false)
                 return BadRequest("CPF invalido");
 
             if (_passengerConnection.FindPassengerRestrict(passengerdto.CPF) != null)
@@ -79,7 +79,7 @@ namespace OnTheFly.PassengerService.Controllers
             {
                 return BadRequest("Data invalida");
             }
-            if(DateTime.Now.Subtract(date).TotalDays < 0)
+            if (DateTime.Now.Subtract(date).TotalDays < 0)
                 return BadRequest("Data invalida");
 
             passengerdto.Zipcode = passengerdto.Zipcode.Replace("-", "");
@@ -93,10 +93,10 @@ namespace OnTheFly.PassengerService.Controllers
             Address address = new()
             {
                 Number = passengerdto.Number,
-                City=auxAddress.City,
-                Complement=auxAddress.Complement,
+                City = auxAddress.City,
+                Complement = auxAddress.Complement,
                 State = auxAddress.State,
-                Zipcode=passengerdto.Zipcode
+                Zipcode = passengerdto.Zipcode
             };
 
             if (auxAddress.Street != "")
@@ -115,17 +115,17 @@ namespace OnTheFly.PassengerService.Controllers
                 CPF = cpf,
                 Address = address,
                 DtBirth = date,
-                DtRegister=DateTime.Now,
-                Gender=passengerdto.Gender,
+                DtRegister = DateTime.Now,
+                Gender = passengerdto.Gender,
                 Name = passengerdto.Name,
-                Phone=passengerdto.Phone,
-                Status=passengerdto.Status
+                Phone = passengerdto.Phone,
+                Status = passengerdto.Status
             };
 
             var insertPassenger = _passengerConnection.Insert(passenger);
-             if (insertPassenger!=null)
-                return Created("","Inserido com sucesso!\n\n"+JsonConvert.SerializeObject(insertPassenger, Formatting.Indented));
-            
+            if (insertPassenger != null)
+                return Created("", "Inserido com sucesso!\n\n" + JsonConvert.SerializeObject(insertPassenger, Formatting.Indented));
+
             return BadRequest("Erro ao inserir Passageiro!");
 
         }
@@ -133,10 +133,10 @@ namespace OnTheFly.PassengerService.Controllers
         [HttpPost("/SendToDeleted/{CPF}")]
         public ActionResult Delete(string CPF)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "") 
+            if (CPF == null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
 
-            CPF =CPF.Replace(".", "").Replace("-", "");
+            CPF = CPF.Replace(".", "").Replace("-", "");
 
             if (!Passenger.ValidateCPF(CPF))
                 return BadRequest("CPF invalido");
@@ -217,7 +217,7 @@ namespace OnTheFly.PassengerService.Controllers
         [HttpPut("/UpdateName/{CPF},{Name}")]
         public ActionResult UpdateName(string CPF, string Name)
         {
-            if(CPF == null || CPF.Equals("string") || CPF == "")
+            if (CPF == null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
 
             CPF = CPF.Replace(".", "").Replace("-", "");
@@ -234,7 +234,7 @@ namespace OnTheFly.PassengerService.Controllers
                 else
                     return BadRequest("erro ao atualizar o nome do Passageiro");
             }
-            
+
             return BadRequest("passageiro nao esta na lista");
         }
 
@@ -381,7 +381,7 @@ namespace OnTheFly.PassengerService.Controllers
             if (!Passenger.ValidateCPF(CPF))
                 return BadRequest("CPF invalido");
 
-            
+
             var passenger = _passengerConnection.FindPassenger(CPF);
             if (passenger != null)
             {
