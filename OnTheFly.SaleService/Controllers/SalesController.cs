@@ -1,8 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Text;
-using System.Xml;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 using OnTheFly.Connections;
@@ -10,10 +6,11 @@ using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 using OnTheFly.SaleService.Services;
 using RabbitMQ.Client;
+using System.Text;
 
 namespace OnTheFly.SaleService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/sales")]
     [ApiController]
     public class SalesController : ControllerBase
     {
@@ -21,7 +18,10 @@ namespace OnTheFly.SaleService.Controllers
         private readonly FlightConnection _flight;
         private readonly PassengerService _passenger;
         private readonly ConnectionFactory _factory;
-        public SalesController(SaleConnection saleConnection, FlightConnection flight, PassengerService passenger, ConnectionFactory factory)
+        public SalesController(
+            SaleConnection saleConnection,
+            FlightConnection flight, PassengerService passenger,
+            ConnectionFactory factory)
         {
             _saleConnection = saleConnection;
             _flight = flight;
@@ -30,18 +30,18 @@ namespace OnTheFly.SaleService.Controllers
         }
 
         
-        [HttpGet]
-        public ActionResult<string> GetAll()
+        [HttpGet(Name = "Get All Sales")]
+        public ActionResult<string> ReadAll()
         {
             var sales = _saleConnection.FindAll();
             if(sales == null)
                 return NoContent();
 
-            return JsonConvert.SerializeObject(sales, Newtonsoft.Json.Formatting.Indented);
+            return JsonConvert.SerializeObject(sales, Formatting.Indented);
         }
 
-        [HttpGet("/getsale/{CPF},{IATA},{RAB},{departure}")]
-        public ActionResult<string> GetSale(string CPF, string IATA, string RAB, string departure)
+        [HttpGet("getsale/{cpf},{iata},{rab},{departure}")]
+        public ActionResult<string> ReadSale(string CPF, string IATA, string RAB, string departure)
         {
             var data = departure.Split('-');
             DateTime date;
@@ -61,8 +61,8 @@ namespace OnTheFly.SaleService.Controllers
             return JsonConvert.SerializeObject(sale, Newtonsoft.Json.Formatting.Indented);
         }
 
-        [HttpPost]
-        public ActionResult Insert(SaleDTO saleDTO)
+        [HttpPost(Name = "Create Sale")]
+        public ActionResult CreateSale(SaleDTO saleDTO)
         {
             if (saleDTO.Passengers == null) return BadRequest("O número de passageiros está nulo");
 
@@ -167,7 +167,7 @@ namespace OnTheFly.SaleService.Controllers
             return Ok("Venda enviada ao banco com sucesso");
         }
 
-        [HttpPut("/UpdateSale/{CPF},{IATA},{RAB},{departure}")]
+        [HttpPut("updatesale/{cpf},{iata},{rab},{departure}")]
         public ActionResult UpdateSale(string CPF, string IATA, string RAB, string departure)
         
         {
@@ -191,8 +191,8 @@ namespace OnTheFly.SaleService.Controllers
                 return BadRequest("Falha ao atualizar status");
         }
 
-        [HttpPost("/SendToDeleted/{CPF},{IATA},{RAB},{departure}")]
-        public ActionResult Delete(string CPF, string IATA, string RAB, string departure)
+        [HttpPost("sendtodeleted/{cpf},{iata},{rab},{departure}")]
+        public ActionResult DeleteSale(string CPF, string IATA, string RAB, string departure)
         {
             var data = departure.Split('-');
             DateTime date;

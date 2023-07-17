@@ -1,9 +1,8 @@
-﻿using System.Text;
-using Microsoft.OpenApi.Extensions;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using Newtonsoft.Json;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
+using System.Text;
 
 namespace OnTheFly.SaleService.Services
 {
