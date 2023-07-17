@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Reflection;
-using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson.Serialization.IdGenerators;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using OnTheFly.Connections;
 using OnTheFly.Models;
@@ -10,21 +7,23 @@ using OnTheFly.PostOfficeService;
 
 namespace OnTheFly.PassengerService.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/passenger")]
     [ApiController]
     public class PassengerController : ControllerBase
     {
         private readonly PassengerConnection _passengerConnection;
         private readonly PostOfficesService _postOfficeService;
 
-        public PassengerController(PassengerConnection passengerConnection, PostOfficesService postOfficeService)
+        public PassengerController(
+            PassengerConnection passengerConnection,
+            PostOfficesService postOfficeService)
         {
             _passengerConnection = passengerConnection;
             _postOfficeService = postOfficeService;
         }
 
-        [HttpGet]
-        public ActionResult<List<Passenger>> GetAll()
+        [HttpGet("Get All Passenger")]
+        public ActionResult<List<Passenger>> ReadAll()
         {
             var passengers = _passengerConnection.FindAll();
             if (passengers.Count == 0)
@@ -32,8 +31,8 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return passengers;
         }
 
-        [HttpGet("{CPF}", Name = "GetCPF")]
-        public ActionResult<Passenger> GetBycpf(string CPF)
+        [HttpGet("{CPF}", Name = "Get by CPF")]
+        public ActionResult<Passenger> ReadByCpf(string CPF)
         {
             if (CPF is null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
@@ -50,8 +49,8 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return passenger;
         }
 
-        [HttpPost]
-        public ActionResult Insert(PassengerDTO passengerdto)
+        [HttpPost(Name = "Create Passenger")]
+        public ActionResult CreatePassenger(PassengerDTO passengerdto)
         {
             if (passengerdto.CPF == null || passengerdto.CPF.Equals("string") || passengerdto.CPF == "")
                 return BadRequest("CPF não informado!");
@@ -130,8 +129,8 @@ namespace OnTheFly.PassengerService.Controllers.v1
 
         }
 
-        [HttpPost("/SendToDeleted/{CPF}")]
-        public ActionResult Delete(string CPF)
+        [HttpPost("SendToDeleted/{CPF}")]
+        public ActionResult DeletePassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
@@ -151,8 +150,8 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro inexistente");
         }
 
-        [HttpPost("/SendToRestricted/{CPF}")]
-        public ActionResult Restrict(string CPF)
+        [HttpPost("SendToRestricted/{CPF}")]
+        public ActionResult RestrictPassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
@@ -172,8 +171,8 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro inexistente");
         }
 
-        [HttpPost("/UnrestrictPassenger/{CPF}")]
-        public ActionResult Unrestrict(string CPF)
+        [HttpPost("UnrestrictPassenger/{CPF}")]
+        public ActionResult UnrestrictPassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
                 return BadRequest("CPF não informado!");
@@ -193,7 +192,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista de restritos");
         }
 
-        [HttpPost("/UndeletPassenger/{CPF}")]
+        [HttpPost("UndeletPassenger/{CPF}")]
         public ActionResult UndeletePassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -214,7 +213,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista de deletados");
         }
 
-        [HttpPut("/UpdateName/{CPF},{Name}")]
+        [HttpPut("UpdateName/{CPF},{Name}")]
         public ActionResult UpdateName(string CPF, string Name)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -238,7 +237,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("/UpdateGender/{CPF},{Gender}")]
+        [HttpPut("UpdateGender/{CPF},{Gender}")]
         public ActionResult UpdateGender(string CPF, string Gender)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -265,7 +264,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("/UpdatePhone/{CPF},{Phone}")]
+        [HttpPut("UpdatePhone/{CPF},{Phone}")]
         public ActionResult UpdatePhone(string CPF, string Phone)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -292,7 +291,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("/UpdateDtBirth/{CPF}")]
+        [HttpPut("UpdateDtBirth/{CPF}")]
         public ActionResult UpdateDtBirth(string CPF, [FromBody] DateDTO DtBirth)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -325,7 +324,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("/UpdateAddress/{CPF}")]
+        [HttpPut("UpdateAddress/{CPF}")]
         public ActionResult UpdateAddress(string CPF, Address address)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -370,7 +369,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("/ChangeStatus/{CPF}")]
+        [HttpPut("ChangeStatus/{CPF}")]
         public ActionResult ChangeStatus(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
