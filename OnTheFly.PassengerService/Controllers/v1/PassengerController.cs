@@ -31,7 +31,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return passengers;
         }
 
-        [HttpGet("{CPF}", Name = "Get by CPF")]
+        [HttpGet("{cpf}", Name = "Get by CPF")]
         public ActionResult<Passenger> ReadByCpf(string CPF)
         {
             if (CPF is null || CPF.Equals("string") || CPF == "")
@@ -129,7 +129,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
 
         }
 
-        [HttpPost("SendToDeleted/{CPF}", Name = "Delete Passenger")]
+        [HttpPost("sendtodeleted/{cpf}", Name = "Delete Passenger")]
         public ActionResult DeletePassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -150,7 +150,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro inexistente");
         }
 
-        [HttpPost("SendToRestricted/{CPF}", Name = "Restrict Passenger")]
+        [HttpPost("sendtorestricted/{cpf}", Name = "Restrict Passenger")]
         public ActionResult RestrictPassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -171,7 +171,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro inexistente");
         }
 
-        [HttpPost("UnrestrictPassenger/{CPF}", Name = "Unrestrict Passenger")]
+        [HttpPost("unrestrictpassenger/{cpf}", Name = "Unrestrict Passenger")]
         public ActionResult UnrestrictPassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -192,7 +192,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista de restritos");
         }
 
-        [HttpPost("UndeletPassenger/{CPF}", Name = "Undelete Passenger")]
+        [HttpPost("undeletpassenger/{cpf}", Name = "Undelete Passenger")]
         public ActionResult UndeletePassenger(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -213,7 +213,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista de deletados");
         }
 
-        [HttpPut("UpdateName/{CPF},{Name}", Name = "Update Name Passenger")]
+        [HttpPut("updatename/{cpf},{name}", Name = "Update Name Passenger")]
         public ActionResult UpdateName(string CPF, string Name)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -237,7 +237,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("UpdateGender/{CPF},{Gender}", Name = "Update Gender Passenger")]
+        [HttpPut("updategender/{cpf},{gender}", Name = "Update Gender Passenger")]
         public ActionResult UpdateGender(string CPF, string Gender)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -264,7 +264,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("UpdatePhone/{CPF},{Phone}", Name = "Update Phone Passenger")]
+        [HttpPut("updatephone/{cpf},{phone}", Name = "Update Phone Passenger")]
         public ActionResult UpdatePhone(string CPF, string Phone)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -291,7 +291,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("UpdateDtBirth/{CPF}", Name = "Update Date Birth Passenger")]
+        [HttpPut("updatedtbirth/{cpf}", Name = "Update Date Birth Passenger")]
         public ActionResult UpdateDtBirth(string CPF, [FromBody] DateDTO DtBirth)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -324,7 +324,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("UpdateAddress/{CPF}", Name = "Update Address Passenger")]
+        [HttpPut("updateaddress/{cpf}", Name = "Update Address Passenger")]
         public ActionResult UpdateAddress(string CPF, Address address)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
@@ -369,7 +369,7 @@ namespace OnTheFly.PassengerService.Controllers.v1
             return BadRequest("passageiro nao esta na lista");
         }
 
-        [HttpPut("ChangeStatus/{CPF}", Name = "Change Status Passenger")]
+        [HttpPut("changestatus/{cpf}", Name = "Change Status Passenger")]
         public ActionResult ChangeStatus(string CPF)
         {
             if (CPF == null || CPF.Equals("string") || CPF == "")
