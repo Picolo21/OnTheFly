@@ -9,8 +9,11 @@ namespace OnTheFly.SaleService.Services
 
         public async Task<Passenger> GetPassenger(string CPF)
         {
-            HttpResponseMessage res = await _httpClient.GetAsync("https://localhost:5004/api/Passenger/" + CPF);
-            if (!res.IsSuccessStatusCode) return null;
+            HttpResponseMessage res = await _httpClient
+                .GetAsync("https://localhost:5003/api/v1/passengers/" + CPF);
+
+            if (!res.IsSuccessStatusCode)
+                return null;
 
             string content = await res.Content.ReadAsStringAsync();
             Passenger? result = JsonConvert.DeserializeObject<Passenger>(content);

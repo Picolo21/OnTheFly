@@ -10,7 +10,8 @@ namespace OnTheFly.AirCraftService.Services.v1
         {
             try
             {
-                HttpResponseMessage response = await client.GetAsync("https://localhost:5001/api/Companies/" + cnpj);
+                HttpResponseMessage response = await client
+                    .GetAsync("https://localhost:5001/api/v1/companies/" + cnpj);
                 response.EnsureSuccessStatusCode();
                 string ender = await response.Content.ReadAsStringAsync();
                 var company = JsonConvert.DeserializeObject<Company>(ender);

@@ -15,8 +15,11 @@ namespace OnTheFly.SaleService.Services
             try
             {
                 string date=departure.Year+"-"+departure.Month+"-"+departure.Day;
-                HttpResponseMessage res = await _httpClient.GetAsync("https://localhost:5003/api/Flight/"+IATA+","+ RAB+","+ date);
-                if (!res.IsSuccessStatusCode) return null;
+                HttpResponseMessage res = await _httpClient
+                    .GetAsync("https://localhost:5002/api/v1/flights/" + IATA + "," + RAB + "," + date);
+
+                if (!res.IsSuccessStatusCode)
+                    return null;
 
                 string content = await res.Content.ReadAsStringAsync();
                 Flight? result = JsonConvert.DeserializeObject<Flight>(content);
@@ -29,13 +32,21 @@ namespace OnTheFly.SaleService.Services
             }
         }
 
-        public async Task<Flight> PatchFlight(string IATA, string RAB, BsonDateTime departure, int salesNumber)
+        public async Task<Flight> PatchFlight(
+            string IATA,
+            string RAB,
+            BsonDateTime departure,
+            int salesNumber)
         {
             try
             {
                 HttpContent httpContent = new StringContent("", Encoding.UTF8, "application/json");
-                HttpResponseMessage res = await _httpClient.PatchAsync("https://localhost:5003/api/Flight/" + IATA + ", " + RAB + ", " + departure + ", " + salesNumber, httpContent);
-                if (!res.IsSuccessStatusCode) return new Flight();
+                HttpResponseMessage res = await _httpClient
+                    .PatchAsync("https://localhost:5002/api/Flight/" + 
+                    IATA + ", " + RAB + ", " + departure + ", " + salesNumber, httpContent);
+
+                if (!res.IsSuccessStatusCode)
+                    return new Flight();
 
                 string content = await res.Content.ReadAsStringAsync();
                 Flight? result = JsonConvert.DeserializeObject<Flight>(content);

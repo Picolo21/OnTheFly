@@ -10,8 +10,11 @@ namespace OnTheFly.FlightService.Services.v1
 
         public async Task<AirCraft?> GetAircraftAsync(string RAB)
         {
-            HttpResponseMessage res = await _httpClient.GetAsync("https://localhost:5000/api/AirCraft/" + RAB);
-            if (!res.IsSuccessStatusCode) return null;
+            HttpResponseMessage res = await _httpClient
+                .GetAsync("https://localhost:5000/api/v1/aircrafts/" + RAB);
+
+            if (!res.IsSuccessStatusCode)
+                return null;
 
             string content = await res.Content.ReadAsStringAsync();
             AirCraft? result = JsonConvert.DeserializeObject<AirCraft>(content);
@@ -29,8 +32,11 @@ namespace OnTheFly.FlightService.Services.v1
 
             HttpContent httpContent = new StringContent(jsonDate, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage res = await _httpClient.PatchAsync("https://localhost:5000/api/AirCraft/" + RAB, httpContent);
-            if (!res.IsSuccessStatusCode) return null;
+            HttpResponseMessage res = await _httpClient
+                .PatchAsync("https://localhost:5000/api/AirCraft/" + RAB, httpContent);
+
+            if (!res.IsSuccessStatusCode)
+                return null;
 
             string content = await res.Content.ReadAsStringAsync();
             AirCraft? result = JsonConvert.DeserializeObject<AirCraft>(content);
