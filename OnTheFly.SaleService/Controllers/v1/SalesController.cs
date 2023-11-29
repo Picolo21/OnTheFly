@@ -4,11 +4,11 @@ using Newtonsoft.Json;
 using OnTheFly.Connections;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
-using OnTheFly.SaleService.Services;
+using OnTheFly.SaleService.Services.v1;
 using RabbitMQ.Client;
 using System.Text;
 
-namespace OnTheFly.SaleService.Controllers;
+namespace OnTheFly.SaleService.Controllers.v1;
 
 [Route("api/v1/sales")]
 [ApiController]
@@ -29,19 +29,19 @@ public class SalesController : ControllerBase
         _factory = factory;
     }
 
-    
+
     [HttpGet(Name = "Get All Sales")]
-    public ActionResult<string> ReadAll()
+    public async Task<ActionResult<string>> GetAllSalesAsync()
     {
         var sales = _saleConnection.FindAll();
-        if(sales == null)
+        if (sales == null)
             return NoContent();
 
         return JsonConvert.SerializeObject(sales, Formatting.Indented);
     }
 
-    [HttpGet("getsale/{cpf},{iata},{rab},{departure}")]
-    public ActionResult<string> ReadSale(string cpf, string iata, string rab, string departure)
+    [HttpGet("passengers/{cpf}/flight/{departure}/destiny/{iata}/aircraft/{rab}")]
+    public async Task<ActionResult<string>> GetSaleAsync(string cpf, string iata, string rab, string departure)
     {
         var data = departure.Split('-');
         DateTime date;
@@ -58,11 +58,11 @@ public class SalesController : ControllerBase
         if (sale == null)
             return NotFound("Venda não encontrada");
 
-        return JsonConvert.SerializeObject(sale, Newtonsoft.Json.Formatting.Indented);
+        return JsonConvert.SerializeObject(sale, Formatting.Indented);
     }
 
     [HttpPost(Name = "Create Sale")]
-    public ActionResult CreateSale(SaleDto saleDto)
+    public async Task<ActionResult> CreateSaleAsync(SaleDto saleDto)
     {
         if (saleDto.Passengers == null) return BadRequest("O número de passageiros está nulo");
 
@@ -79,7 +79,7 @@ public class SalesController : ControllerBase
         DateTime date;
         try
         {
-            date = DateTime.Parse(saleDto.Departure.Year + "/" + saleDto.Departure.Month + "/" + saleDto.Departure.Day+" 09:00");
+            date = DateTime.Parse(saleDto.Departure.Year + "/" + saleDto.Departure.Month + "/" + saleDto.Departure.Day + " 09:00");
         }
         catch
         {
@@ -87,21 +87,21 @@ public class SalesController : ControllerBase
         }
 
         Flight? flight = _flight.Get(saleDto.Iata, rab, BsonDateTime.Create(date));
-        if (flight == null) 
+        if (flight == null)
             return NotFound("Voo não encontrado");
 
         List<string> passengers = new List<string>();
 
         foreach (string cpf in saleDto.Passengers)
         {
-            Passenger? passenger = _passenger.GetPassenger(cpf).Result;
-            if (passenger == null) 
+            Passenger? passenger = _passenger.GetPassengerAsync(cpf).Result;
+            if (passenger == null)
                 return NotFound("Passageiro não encontrado");
 
-            if (!passenger.Status) 
+            if (!passenger.Status)
                 return BadRequest("Existem passageiros impedidos de comprar");
 
-            if (Passenger.ValidateAge(passenger) < 18 && passengers.Count == 0) 
+            if (Passenger.ValidateAge(passenger) < 18 && passengers.Count == 0)
                 return Unauthorized("Menores de idade não podem ser o cadastrante da venda");
 
             passengers.Add(passenger.Cpf);
@@ -109,7 +109,7 @@ public class SalesController : ControllerBase
 
         foreach (var passenger in passengers)
         {
-            var elements=passengers.FindAll(p => p == passenger);
+            var elements = passengers.FindAll(p => p == passenger);
             if (elements.Count != 1)
                 return BadRequest("Não é permitida a compra de mais de uma passagem por passageiro");
         }
@@ -118,7 +118,7 @@ public class SalesController : ControllerBase
             return BadRequest("A quantidade de passagens excede a capacidade do avião");
 
         _flight.UpdateSales(flight.Destiny.Iata, flight.Plane.Rab, flight.Departure, passengers.Count);
-           
+
 
         Sale sale = new Sale
         {
@@ -173,9 +173,34 @@ public class SalesController : ControllerBase
         return Ok("Venda enviada ao banco com sucesso");
     }
 
-    [HttpPut("updatesale/{cpf},{iata},{rab},{departure}")]
-    public ActionResult UpdateSale(string cpf, string iata, string rab, string departure)
-    
+    [HttpPost("passengers/{cpf}/flight/{departure}/destiny/{iata}/aircraft/{rab}")]
+    public async Task<ActionResult> DeleteSaleAsync(string cpf, string iata, string rab, string departure)
+    {
+        var data = departure.Split('-');
+
+        DateTime date;
+        try
+        {
+            date = DateTime.Parse(data[0] + "/" + data[1] + "/" + data[2] + " 9:00");
+        }
+        catch
+        {
+            return BadRequest("Data invalida");
+        }
+
+        Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
+
+        if (sale == null) 
+            return NotFound("Venda não encontrada");
+
+        _saleConnection.Delete(cpf, iata, rab, date);
+
+        return Ok("Deletado com sucesso");
+    }
+
+    [HttpPut("passengers/{cpf}/flight/{departure}/destiny/{iata}/aircraft/{rab}")]
+    public async Task<ActionResult> UpdateSaleAsync(string cpf, string iata, string rab, string departure)
+
     {
         var data = departure.Split('-');
         DateTime date;
@@ -189,32 +214,13 @@ public class SalesController : ControllerBase
         }
 
         Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
-        if (sale == null) return NotFound("Venda não encontrada");
+
+        if (sale == null) 
+            return NotFound("Venda não encontrada");
 
         if (_saleConnection.Update(cpf, iata, rab, date, sale))
             return Ok("Status atualizado com sucesso");
         else
             return BadRequest("Falha ao atualizar status");
-    }
-
-    [HttpPost("sendtodeleted/{cpf},{iata},{rab},{departure}")]
-    public ActionResult DeleteSale(string cpf, string iata, string rab, string departure)
-    {
-        var data = departure.Split('-');
-        DateTime date;
-        try
-        {
-            date = DateTime.Parse(data[0] + "/" + data[1] + "/" + data[2] + " 9:00");
-        }
-        catch
-        {
-            return BadRequest("Data invalida");
-        }
-
-        Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
-        if (sale == null) return NotFound("Venda não encontrada");
-
-        _saleConnection.Delete(cpf, iata, rab, date);
-        return Ok("Deletado com sucesso"); ;
     }
 }

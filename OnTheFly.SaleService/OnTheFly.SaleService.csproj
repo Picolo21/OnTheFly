@@ -15,9 +15,4 @@
     <ProjectReference Include="..\OnTheFly.Connections\OnTheFly.Connections.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\v1\" />
-    <Folder Include="Services\v1\" />
-  </ItemGroup>
-
 </Project>

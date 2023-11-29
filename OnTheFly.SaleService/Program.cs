@@ -1,5 +1,5 @@
 using OnTheFly.Connections;
-using OnTheFly.SaleService.Services;
+using OnTheFly.SaleService.Services.v1;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
