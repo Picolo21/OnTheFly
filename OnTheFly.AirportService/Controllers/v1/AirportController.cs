@@ -29,7 +29,7 @@ namespace OnTheFly.AirportService.Controllers.v1
 
             State state = _state.GetUF(airport.State);
             if (state == null) airport.State = "null";
-            else airport.State = state.UF;
+            else airport.State = state.Uf;
 
             return airport;
         }

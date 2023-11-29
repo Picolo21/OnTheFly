@@ -72,7 +72,7 @@ public class PassengerController : ControllerBase
         DateTime date;
         try
         {
-            date = DateTime.Parse(passengerDto.DtBirth.Year + "/" + passengerDto.DtBirth.Month + "/" + passengerDto.DtBirth.Day);
+            date = DateTime.Parse(passengerDto.DateBirth.Year + "/" + passengerDto.DateBirth.Month + "/" + passengerDto.DateBirth.Day);
         }
         catch
         {
@@ -82,7 +82,7 @@ public class PassengerController : ControllerBase
             return BadRequest("Data invalida");
 
         passengerDto.Zipcode = passengerDto.Zipcode.Replace("-", "");
-        var auxAddress = _postOfficeService.GetAddress(passengerDto.Zipcode).Result;
+        var auxAddress = _postOfficeService.GetAddressAsync(passengerDto.Zipcode).Result;
         if (auxAddress == null)
             return NotFound("Endereço nao encontrado");
 
@@ -337,7 +337,7 @@ public class PassengerController : ControllerBase
 
         address.Zipcode = address.Zipcode.Replace("-", "");
 
-        var auxAddress = _postOfficeService.GetAddress(address.Zipcode).Result;
+        var auxAddress = _postOfficeService.GetAddressAsync(address.Zipcode).Result;
         if (auxAddress == null)
             return NotFound("Endereço nao encontrado");
 

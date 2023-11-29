@@ -1,9 +1,8 @@
-﻿namespace OnTheFly.Models.DTO
+﻿namespace OnTheFly.Models.DTO;
+
+public class DateDto
 {
-    public class DateDto
-    {
-        public int Year { get; set; }
-        public int Month { get; set; }
-        public int Day { get; set; }
-    }
+    public int Year { get; set; }
+    public int Month { get; set; }
+    public int Day { get; set; }
 }
