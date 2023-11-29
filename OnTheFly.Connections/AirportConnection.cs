@@ -1,5 +1,4 @@
 ﻿using MongoDB.Driver;
-using System.Collections.Generic;
 using OnTheFly.Models;
 
 namespace OnTheFly.AirportService.Services
@@ -20,7 +19,7 @@ namespace OnTheFly.AirportService.Services
             Collection.Find(airport => true).ToList();
 
         public Airport? Get(string iata) =>
-            Collection.Find<Airport>(airport => airport.IATA == iata).FirstOrDefault();
+            Collection.Find<Airport>(airport => airport.Iata == iata).FirstOrDefault();
 
         public List<Airport> GetByState(string state) =>
             Collection.Find<Airport>(airport => airport.State == state).ToList();

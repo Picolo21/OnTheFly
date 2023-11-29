@@ -41,7 +41,7 @@ namespace OnTheFly.SaleService.Controllers
         }
 
         [HttpGet("getsale/{cpf},{iata},{rab},{departure}")]
-        public ActionResult<string> ReadSale(string CPF, string IATA, string RAB, string departure)
+        public ActionResult<string> ReadSale(string cpf, string iata, string rab, string departure)
         {
             var data = departure.Split('-');
             DateTime date;
@@ -54,7 +54,7 @@ namespace OnTheFly.SaleService.Controllers
                 return BadRequest("Data invalida");
             }
 
-            Sale? sale = _saleConnection.FindSale(CPF, IATA, RAB, date);
+            Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
             if (sale == null)
                 return NotFound("Venda não encontrada");
 
@@ -62,48 +62,54 @@ namespace OnTheFly.SaleService.Controllers
         }
 
         [HttpPost(Name = "Create Sale")]
-        public ActionResult CreateSale(SaleDTO saleDTO)
+        public ActionResult CreateSale(SaleDto saleDto)
         {
-            if (saleDTO.Passengers == null) return BadRequest("O número de passageiros está nulo");
+            if (saleDto.Passengers == null) return BadRequest("O número de passageiros está nulo");
 
-            if (saleDTO.Reserved == saleDTO.Sold)
+            if (saleDto.Reserved == saleDto.Sold)
                 return BadRequest("Status de venda ou agendamento invalido");
 
-            string rab = saleDTO.RAB.Replace("-", "");
+            string rab = saleDto.Rab.Replace("-", "");
             if (rab.Length != 5)
                 return BadRequest("Quantidade de caracteres de RAB inválida");
 
-            if (!AirCraft.RABValidation(rab))
+            if (!AirCraft.RabValidation(rab))
                 return BadRequest("RAB inválido");
 
             DateTime date;
             try
             {
-                date = DateTime.Parse(saleDTO.Departure.Year + "/" + saleDTO.Departure.Month + "/" + saleDTO.Departure.Day+" 09:00");
+                date = DateTime.Parse(saleDto.Departure.Year + "/" + saleDto.Departure.Month + "/" + saleDto.Departure.Day+" 09:00");
             }
             catch
             {
                 return BadRequest("Data invalida");
             }
 
-            Flight? flight = _flight.Get(saleDTO.IATA, rab, BsonDateTime.Create(date));
-            if (flight == null) return NotFound("Voo não encontrado");
+            Flight? flight = _flight.Get(saleDto.Iata, rab, BsonDateTime.Create(date));
+            if (flight == null) 
+                return NotFound("Voo não encontrado");
 
             List<string> passengers = new List<string>();
 
-            foreach (string cpf in saleDTO.Passengers)
+            foreach (string cpf in saleDto.Passengers)
             {
                 Passenger? passenger = _passenger.GetPassenger(cpf).Result;
-                if (passenger == null) return NotFound("Passageiro não encontrado");
-                if (!passenger.Status) return BadRequest("Existem passageiros impedidos de comprar");
-                if (Passenger.ValidateAge(passenger) < 18 && passengers.Count == 0) return Unauthorized("Menores de idade não podem ser o cadastrante da venda");
+                if (passenger == null) 
+                    return NotFound("Passageiro não encontrado");
+
+                if (!passenger.Status) 
+                    return BadRequest("Existem passageiros impedidos de comprar");
+
+                if (Passenger.ValidateAge(passenger) < 18 && passengers.Count == 0) 
+                    return Unauthorized("Menores de idade não podem ser o cadastrante da venda");
 
                 passengers.Add(passenger.CPF);
             }
 
             foreach (var passenger in passengers)
             {
-                var elements=passengers.FindAll(p=>p==passenger);
+                var elements=passengers.FindAll(p => p == passenger);
                 if (elements.Count != 1)
                     return BadRequest("Não é permitida a compra de mais de uma passagem por passageiro");
             }
@@ -111,15 +117,15 @@ namespace OnTheFly.SaleService.Controllers
             if (passengers.Count + flight.Sales > flight.Plane.Capacity)
                 return BadRequest("A quantidade de passagens excede a capacidade do avião");
 
-            _flight.UpdateSales(flight.Destiny.IATA, flight.Plane.RAB, flight.Departure, passengers.Count);
+            _flight.UpdateSales(flight.Destiny.Iata, flight.Plane.Rab, flight.Departure, passengers.Count);
                
 
             Sale sale = new Sale
             {
                 Flight = flight,
                 Passengers = passengers,
-                Reserved = saleDTO.Reserved,
-                Sold = saleDTO.Sold
+                Reserved = saleDto.Reserved,
+                Sold = saleDto.Sold
             };
 
             using (var connection = _factory.CreateConnection())
@@ -168,7 +174,7 @@ namespace OnTheFly.SaleService.Controllers
         }
 
         [HttpPut("updatesale/{cpf},{iata},{rab},{departure}")]
-        public ActionResult UpdateSale(string CPF, string IATA, string RAB, string departure)
+        public ActionResult UpdateSale(string cpf, string iata, string rab, string departure)
         
         {
             var data = departure.Split('-');
@@ -182,17 +188,17 @@ namespace OnTheFly.SaleService.Controllers
                 return BadRequest("Data invalida");
             }
 
-            Sale? sale = _saleConnection.FindSale(CPF, IATA, RAB, date);
+            Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
             if (sale == null) return NotFound("Venda não encontrada");
 
-            if (_saleConnection.Update(CPF, IATA, RAB, date, sale))
+            if (_saleConnection.Update(cpf, iata, rab, date, sale))
                 return Ok("Status atualizado com sucesso");
             else
                 return BadRequest("Falha ao atualizar status");
         }
 
         [HttpPost("sendtodeleted/{cpf},{iata},{rab},{departure}")]
-        public ActionResult DeleteSale(string CPF, string IATA, string RAB, string departure)
+        public ActionResult DeleteSale(string cpf, string iata, string rab, string departure)
         {
             var data = departure.Split('-');
             DateTime date;
@@ -205,10 +211,10 @@ namespace OnTheFly.SaleService.Controllers
                 return BadRequest("Data invalida");
             }
 
-            Sale? sale = _saleConnection.FindSale(CPF, IATA, RAB, date);
+            Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
             if (sale == null) return NotFound("Venda não encontrada");
 
-            _saleConnection.Delete(CPF, IATA, RAB, date);
+            _saleConnection.Delete(cpf, iata, rab, date);
             return Ok("Deletado com sucesso"); ;
         }
     }

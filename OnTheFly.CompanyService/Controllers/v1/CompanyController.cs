@@ -51,26 +51,26 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPost(Name = "Create Company")]
-        public async Task<ActionResult<string>> CreateCompanyAsync(CompanyDTO companyDTO)
+        public async Task<ActionResult<string>> CreateCompanyAsync(CompanyDto companyDto)
         {
             #region Company
-            companyDTO.Cnpj = companyDTO.Cnpj.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
-            if (companyDTO.Cnpj == null) return BadRequest("Cnpj não encontrado");
-            if (!CnpjValidation.Validate(companyDTO.Cnpj))
+            companyDto.Cnpj = companyDto.Cnpj.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
+            if (companyDto.Cnpj == null) return BadRequest("Cnpj não encontrado");
+            if (!CnpjValidation.Validate(companyDto.Cnpj))
                 return BadRequest("Cnpj Invalido");
 
-            if (companyDTO.Name == "" || companyDTO.Name == "string")
+            if (companyDto.Name == "" || companyDto.Name == "string")
                 return BadRequest("A razão social da companhia não foi informada! Por favor, insira um nome correspondente a razão social da companhia");
 
-            if (companyDTO.NameOPT == "" || companyDTO.NameOPT == "string")
-                companyDTO.NameOPT = companyDTO.Name;
+            if (companyDto.NameOpt == "" || companyDto.NameOpt == "string")
+                companyDto.NameOpt = companyDto.Name;
             #endregion
 
             #region Date
             DateTime date;
             try
             {
-                date = DateTime.Parse(companyDTO.DtOpen.Year + "/" + companyDTO.DtOpen.Month + "/" + companyDTO.DtOpen.Day);
+                date = DateTime.Parse(companyDto.DtOpen.Year + "/" + companyDto.DtOpen.Month + "/" + companyDto.DtOpen.Day);
             }
             catch
             {
@@ -81,29 +81,29 @@ namespace OnTheFly.CompanyService.Controllers.v1
             #endregion
 
             #region Address
-            companyDTO.Zipcode = companyDTO.Zipcode.Replace("-", "");
-            var auxAddress = _postOfficeService.GetAddress(companyDTO.Zipcode).Result;
+            companyDto.Zipcode = companyDto.Zipcode.Replace("-", "");
+            var auxAddress = _postOfficeService.GetAddress(companyDto.Zipcode).Result;
             if (auxAddress == null)
                 return NotFound("Endereço nao encontrado");
 
-            if (companyDTO.Number == 0)
+            if (companyDto.Number == 0)
                 return BadRequest("Campo Number é obrigatorio");
 
             Address address = new()
             {
-                Number = companyDTO.Number,
+                Number = companyDto.Number,
                 City = auxAddress.City,
                 Complement = auxAddress.Complement,
                 State = auxAddress.State,
-                Zipcode = companyDTO.Zipcode
+                Zipcode = companyDto.Zipcode
             };
 
             if (auxAddress.Street != "")
                 address.Street = auxAddress.Street;
             else
             {
-                if (companyDTO.Street != "" || companyDTO.Street.Equals("string") || companyDTO.Street != null)
-                    address.Street = companyDTO.Street;
+                if (companyDto.Street != "" || companyDto.Street.Equals("string") || companyDto.Street != null)
+                    address.Street = companyDto.Street;
                 else
                     return BadRequest("O campo Street é obrigatorio");
             }
@@ -112,11 +112,11 @@ namespace OnTheFly.CompanyService.Controllers.v1
             Company company = new Company()
             {
                 Address = address,
-                Cnpj = companyDTO.Cnpj,
+                Cnpj = companyDto.Cnpj,
                 DtOpen = date,
-                Name = companyDTO.Name,
-                NameOPT = companyDTO.NameOPT,
-                Status = companyDTO.Status
+                Name = companyDto.Name,
+                NameOPT = companyDto.NameOpt,
+                Status = companyDto.Status
             };
 
             var insertCompany = _companyConnection.Insert(company);
@@ -127,19 +127,19 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPost("SendToDeleted/{CNPJ}", Name = "Delete Company")]
-        public async Task<ActionResult> DeleteAsync(string CNPJ)
+        public async Task<ActionResult> DeleteAsync(string cnpj)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
-            if (_companyConnection.FindByCnpj(CNPJ) != null || _companyConnection.FindByCnpjRestricted(CNPJ) != null)
+            if (_companyConnection.FindByCnpj(cnpj) != null || _companyConnection.FindByCnpjRestricted(cnpj) != null)
             {
-                if (_companyConnection.Delete(CNPJ))
+                if (_companyConnection.Delete(cnpj))
                     return Ok("companhia deletada com sucesso!");
                 else
                     return BadRequest("erro ao deletar");
@@ -148,19 +148,19 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPost("SendToRestricted/{CNPJ}", Name = "Restrict Company")]
-        public async Task<ActionResult> RestrictAsync(string CNPJ)
+        public async Task<ActionResult> RestrictAsync(string cnpj)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
-            if (_companyConnection.FindByCnpj(CNPJ) != null)
+            if (_companyConnection.FindByCnpj(cnpj) != null)
             {
-                if (_companyConnection.Restrict(CNPJ))
+                if (_companyConnection.Restrict(cnpj))
                     return Ok("Companhia restrita com sucesso!");
                 else
                     return BadRequest("erro ao restringir");
@@ -169,19 +169,19 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPost("UnrestrictCompany/{CNPJ}", Name = "Unrestrict Company")]
-        public async Task<ActionResult> UnrestrictAsync(string CNPJ)
+        public async Task<ActionResult> UnrestrictAsync(string cnpj)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
-            if (_companyConnection.FindByCnpjRestricted(CNPJ) != null)
+            if (_companyConnection.FindByCnpjRestricted(cnpj) != null)
             {
-                if (_companyConnection.Unrestrict(CNPJ) != null)
+                if (_companyConnection.Unrestrict(cnpj) != null)
                     return Ok("Companhia retirada da lista de restritos com sucesso!");
                 else
                     return BadRequest("erro ao retirar da lista de restritos");
@@ -190,19 +190,19 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPost("UndeleteCompany/{CNPJ}", Name = "Undelete Company")]
-        public async Task<ActionResult> UndeleteCompanyAsync(string CNPJ)
+        public async Task<ActionResult> UndeleteCompanyAsync(string cnpj)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
-            if (_companyConnection.FindByCnpjDeleted(CNPJ) != null)
+            if (_companyConnection.FindByCnpjDeleted(cnpj) != null)
             {
-                if (_companyConnection.UndeleteCompany(CNPJ))
+                if (_companyConnection.UndeleteCompany(cnpj))
                     return Ok("Companhia retirada da lista de deletados com sucesso!");
                 else
                     return BadRequest("erro ao retirar da lista de deletados");
@@ -211,21 +211,21 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPut("UpdateNameOPT/{CNPJ},{NameOPT}", Name = "Update Name")]
-        public async Task<ActionResult> UpdateNameAsync(string CNPJ, string NameOPT)
+        public async Task<ActionResult> UpdateNameAsync(string cnpj, string nameOpt)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
-            var company = _companyConnection.FindByCnpj(CNPJ);
+            var company = _companyConnection.FindByCnpj(cnpj);
             if (company != null)
             {
-                company.NameOPT = NameOPT;
-                if (_companyConnection.Update(CNPJ, company))
+                company.NameOPT = nameOpt;
+                if (_companyConnection.Update(cnpj, company))
                     return Ok("NomeOPT do Companhia atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o nomeOPT da Companhia");
@@ -235,14 +235,14 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPut("UpdateAddress/{CNPJ}", Name = "Update Address")]
-        public async Task<ActionResult> UpdateAddressAsync(string CNPJ, Address address)
+        public async Task<ActionResult> UpdateAddressAsync(string cnpj, Address address)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
             address.Zipcode = address.Zipcode.Replace("-", "");
@@ -266,11 +266,11 @@ namespace OnTheFly.CompanyService.Controllers.v1
                     return BadRequest("O campo Street é obrigatorio");
             }
 
-            var company = _companyConnection.FindByCnpj(CNPJ);
+            var company = _companyConnection.FindByCnpj(cnpj);
             if (company != null)
             {
                 company.Address = address;
-                if (_companyConnection.Update(CNPJ, company) != null)
+                if (_companyConnection.Update(cnpj, company) != null)
                     return Ok("Endereço da Companhia atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o endereço da Companhia");
@@ -280,22 +280,22 @@ namespace OnTheFly.CompanyService.Controllers.v1
         }
 
         [HttpPut("ChangeStatus/{CNPJ}", Name = "Change Status")]
-        public async Task<ActionResult> ChangeStatusAsync(string CNPJ)
+        public async Task<ActionResult> ChangeStatusAsync(string cnpj)
         {
-            if (CNPJ == null || CNPJ.Equals("string") || CNPJ == "")
+            if (cnpj == null || cnpj.Equals("string") || cnpj == "")
                 return BadRequest("CNPJ não informado!");
 
-            CNPJ = CNPJ.Replace("%2F", "/");
+            cnpj = cnpj.Replace("%2F", "/");
 
-            if (!CnpjValidation.Validate(CNPJ))
+            if (!CnpjValidation.Validate(cnpj))
                 return BadRequest("CNPJ invalido");
 
 
-            var company = _companyConnection.FindByCnpj(CNPJ);
+            var company = _companyConnection.FindByCnpj(cnpj);
             if (company != null)
             {
                 company.Status = !company.Status;
-                if (_companyConnection.Update(CNPJ, company))
+                if (_companyConnection.Update(cnpj, company))
                     return Ok("Status da Companhia atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o status da Companhia");

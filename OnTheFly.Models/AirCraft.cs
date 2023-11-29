@@ -9,15 +9,15 @@ namespace OnTheFly.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         [StringLength(6)]
-        public string RAB { get; set; }
+        public string? Rab { get; set; }
         public int Capacity { get; set; }
         public DateTime DtRegistry { get; set; }
         public DateTime? DtLastFlight { get; set; }
-        public Company Company { get; set; }
+        public Company? Company { get; set; }
 
-        public static bool RABValidation(string rab)
+        public static bool RabValidation(string rab)
         {
             rab = rab.ToLower();
             char[] aceptedLetters = new char[] { 'p', 'r', 's', 't', 'u' };

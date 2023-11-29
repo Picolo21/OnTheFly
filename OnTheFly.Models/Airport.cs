@@ -10,25 +10,25 @@ namespace OnTheFly.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [BsonElement("iata")]
         [JsonPropertyName("iata")]
         [StringLength(3)]
-        public string IATA { get; set; }
+        public string? Iata { get; set; }
 
         [BsonElement("state")]
         [JsonPropertyName("state")]
-        public string State { get; set; }
+        public string? State { get; set; }
 
         [BsonElement("city")]
         [JsonPropertyName("city")]
         [StringLength(20)]
-        public string City { get; set; }
+        public string? City { get; set; }
 
         [BsonElement("country")]
         [JsonPropertyName("country")]
         [StringLength(2)]
-        public string Country { get; set; }
+        public string? Country { get; set; }
     }
 }

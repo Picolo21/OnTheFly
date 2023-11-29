@@ -1,7 +1,5 @@
-﻿using Microsoft.VisualBasic;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;
 
@@ -16,7 +14,7 @@ namespace OnTheFly.Connections
             Database = client.GetDatabase("Flight");
         }
 
-        public Flight Insert(FlightDTO flightDTO, AirCraft aircraft, Airport airport, DateTime date)
+        public Flight Insert(FlightDto flightDto, AirCraft aircraft, Airport airport, DateTime date)
         {
             // Dados de flight
             #region flight
@@ -25,8 +23,8 @@ namespace OnTheFly.Connections
                 Destiny = airport,
                 Plane = aircraft,
                 Departure = date,
-                Status = flightDTO.Status,
-                Sales = flightDTO.Sales
+                Status = flightDto.Status,
+                Sales = flightDto.Sales
             };
             #endregion
 

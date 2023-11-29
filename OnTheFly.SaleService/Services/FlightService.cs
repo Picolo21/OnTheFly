@@ -10,13 +10,13 @@ namespace OnTheFly.SaleService.Services
     {
         private HttpClient _httpClient = new HttpClient();
 
-        public async Task<Flight> GetFlight(string IATA, string RAB, DateDTO departure)
+        public async Task<Flight> GetFlight(string iata, string rab, DateDto departure)
         {
             try
             {
                 string date=departure.Year+"-"+departure.Month+"-"+departure.Day;
                 HttpResponseMessage res = await _httpClient
-                    .GetAsync("https://localhost:5002/api/v1/flights/" + IATA + "," + RAB + "," + date);
+                    .GetAsync("https://localhost:5002/api/v1/flights/" + iata + "," + rab + "," + date);
 
                 if (!res.IsSuccessStatusCode)
                     return null;
@@ -33,8 +33,8 @@ namespace OnTheFly.SaleService.Services
         }
 
         public async Task<Flight> PatchFlight(
-            string IATA,
-            string RAB,
+            string iata,
+            string rab,
             BsonDateTime departure,
             int salesNumber)
         {
@@ -43,7 +43,7 @@ namespace OnTheFly.SaleService.Services
                 HttpContent httpContent = new StringContent("", Encoding.UTF8, "application/json");
                 HttpResponseMessage res = await _httpClient
                     .PatchAsync("https://localhost:5002/api/Flight/" + 
-                    IATA + ", " + RAB + ", " + departure + ", " + salesNumber, httpContent);
+                    iata + ", " + rab + ", " + departure + ", " + salesNumber, httpContent);
 
                 if (!res.IsSuccessStatusCode)
                     return new Flight();

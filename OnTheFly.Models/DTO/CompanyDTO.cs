@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace OnTheFly.Models.DTO
 {
-    public class CompanyDTO
+    public class CompanyDto
     {
         [StringLength(18)]
-        public string Cnpj { get; set; }
+        public string? Cnpj { get; set; }
 
         [StringLength(30)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [StringLength(30)]
-        public string NameOPT { get; set; }
+        public string? NameOpt { get; set; }
 
-        public DateDTO DtOpen { get; set; }
+        public DateDto? DtOpen { get; set; }
 
         public bool? Status { get; set; }
 
-        public string Zipcode { get; set; }
+        public string? Zipcode { get; set; }
 
-        public string Street { get; set; }
+        public string? Street { get; set; }
 
         public int Number { get; set; }
     }

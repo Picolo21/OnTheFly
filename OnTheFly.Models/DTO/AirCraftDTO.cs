@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace OnTheFly.Models.DTO
 {
-    public class AirCraftDTO
+    public class AirCraftDto
     {
         [StringLength(6)]
-        public string RAB { get; set; }
+        public string? Rab { get; set; }
         public int Capacity { get; set; }
-        public DateDTO DtRegistry { get; set; }
-        public DateDTO? DtLastFlight { get; set; }
-        public string Company { get; set; }
+        public DateDto? DtRegistry { get; set; }
+        public DateDto? DtLastFlight { get; set; }
+        public string? Company { get; set; }
     }
 }

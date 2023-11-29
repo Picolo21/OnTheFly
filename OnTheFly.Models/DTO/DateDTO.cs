@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OnTheFly.Models.DTO
+﻿namespace OnTheFly.Models.DTO
 {
-    public class DateDTO
+    public class DateDto
     {
         public int Year { get; set; }
         public int Month { get; set; }

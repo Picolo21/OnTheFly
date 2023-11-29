@@ -32,16 +32,16 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpGet("{cpf}", Name = "Get by CPF")]
-        public ActionResult<Passenger> ReadByCpf(string CPF)
+        public ActionResult<Passenger> ReadByCpf(string cpf)
         {
-            if (CPF is null || CPF.Equals("string") || CPF == "")
+            if (cpf is null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
-            if (Passenger.ValidateCPF(CPF) == false)
+            cpf = cpf.Replace(".", "").Replace("-", "");
+            if (Passenger.ValidateCPF(cpf) == false)
                 return BadRequest("CPF invalido");
 
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
 
             if (passenger == null)
                 return NotFound("Passageiro com este cpf nao encontrado");
@@ -50,29 +50,29 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPost(Name = "Create Passenger")]
-        public ActionResult CreatePassenger(PassengerDTO passengerdto)
+        public ActionResult CreatePassenger(PassengerDto passengerDto)
         {
-            if (passengerdto.CPF == null || passengerdto.CPF.Equals("string") || passengerdto.CPF == "")
+            if (passengerDto.Cpf == null || passengerDto.Cpf.Equals("string") || passengerDto.Cpf == "")
                 return BadRequest("CPF não informado!");
 
-            var cpf = passengerdto.CPF.Replace(".", "").Replace("-", "");
+            var cpf = passengerDto.Cpf.Replace(".", "").Replace("-", "");
 
             if (Passenger.ValidateCPF(cpf) == false)
                 return BadRequest("CPF invalido");
 
-            if (_passengerConnection.FindPassengerRestrict(passengerdto.CPF) != null)
+            if (_passengerConnection.FindPassengerRestrict(passengerDto.Cpf) != null)
                 return BadRequest("Passageiro restrito!!");
 
-            if (_passengerConnection.FindPassengerDeleted(passengerdto.CPF) != null)
+            if (_passengerConnection.FindPassengerDeleted(passengerDto.Cpf) != null)
                 return BadRequest("Impossivel inserir este passageiro");
 
-            if (_passengerConnection.FindPassenger(passengerdto.CPF) != null)
+            if (_passengerConnection.FindPassenger(passengerDto.Cpf) != null)
                 return Conflict("Passageiro ja cadastrado");
 
             DateTime date;
             try
             {
-                date = DateTime.Parse(passengerdto.DtBirth.Year + "/" + passengerdto.DtBirth.Month + "/" + passengerdto.DtBirth.Day);
+                date = DateTime.Parse(passengerDto.DtBirth.Year + "/" + passengerDto.DtBirth.Month + "/" + passengerDto.DtBirth.Day);
             }
             catch
             {
@@ -81,29 +81,29 @@ namespace OnTheFly.PassengerService.Controllers.v1
             if (DateTime.Now.Subtract(date).TotalDays < 0)
                 return BadRequest("Data invalida");
 
-            passengerdto.Zipcode = passengerdto.Zipcode.Replace("-", "");
-            var auxAddress = _postOfficeService.GetAddress(passengerdto.Zipcode).Result;
+            passengerDto.Zipcode = passengerDto.Zipcode.Replace("-", "");
+            var auxAddress = _postOfficeService.GetAddress(passengerDto.Zipcode).Result;
             if (auxAddress == null)
                 return NotFound("Endereço nao encontrado");
 
-            if (passengerdto.Number == 0)
+            if (passengerDto.Number == 0)
                 return BadRequest("Campo Number é obrigatorio");
 
             Address address = new()
             {
-                Number = passengerdto.Number,
+                Number = passengerDto.Number,
                 City = auxAddress.City,
                 Complement = auxAddress.Complement,
                 State = auxAddress.State,
-                Zipcode = passengerdto.Zipcode
+                Zipcode = passengerDto.Zipcode
             };
 
             if (auxAddress.Street != "")
                 address.Street = auxAddress.Street;
             else
             {
-                if (passengerdto.Street != "" || passengerdto.Street.Equals("string") || passengerdto.Street != null)
-                    address.Street = passengerdto.Street;
+                if (passengerDto.Street != "" || passengerDto.Street.Equals("string") || passengerDto.Street != null)
+                    address.Street = passengerDto.Street;
                 else
                     return BadRequest("O campo Street é obrigatorio");
             }
@@ -115,10 +115,10 @@ namespace OnTheFly.PassengerService.Controllers.v1
                 Address = address,
                 DtBirth = date,
                 DtRegister = DateTime.Now,
-                Gender = passengerdto.Gender,
-                Name = passengerdto.Name,
-                Phone = passengerdto.Phone,
-                Status = passengerdto.Status
+                Gender = passengerDto.Gender,
+                Name = passengerDto.Name,
+                Phone = passengerDto.Phone,
+                Status = passengerDto.Status
             };
 
             var insertPassenger = _passengerConnection.Insert(passenger);
@@ -130,19 +130,19 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPost("sendtodeleted/{cpf}", Name = "Delete Passenger")]
-        public ActionResult DeletePassenger(string CPF)
+        public ActionResult DeletePassenger(string cpf)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            if (_passengerConnection.FindPassenger(CPF) != null || _passengerConnection.FindPassengerRestrict(CPF) != null)
+            if (_passengerConnection.FindPassenger(cpf) != null || _passengerConnection.FindPassengerRestrict(cpf) != null)
             {
-                if (_passengerConnection.Delete(CPF))
+                if (_passengerConnection.Delete(cpf))
                     return Ok("Passageiro deletado com sucesso!");
                 else
                     return BadRequest("erro ao deletar");
@@ -151,19 +151,19 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPost("sendtorestricted/{cpf}", Name = "Restrict Passenger")]
-        public ActionResult RestrictPassenger(string CPF)
+        public ActionResult RestrictPassenger(string cpf)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            if (_passengerConnection.FindPassenger(CPF) != null)
+            if (_passengerConnection.FindPassenger(cpf) != null)
             {
-                if (_passengerConnection.Restrict(CPF))
+                if (_passengerConnection.Restrict(cpf))
                     return Ok("Passageiro restrito com sucesso!");
                 else
                     return BadRequest("erro ao restringir");
@@ -172,19 +172,19 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPost("unrestrictpassenger/{cpf}", Name = "Unrestrict Passenger")]
-        public ActionResult UnrestrictPassenger(string CPF)
+        public ActionResult UnrestrictPassenger(string cpf)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            if (_passengerConnection.FindPassengerRestrict(CPF) != null)
+            if (_passengerConnection.FindPassengerRestrict(cpf) != null)
             {
-                if (_passengerConnection.Unrestrict(CPF))
+                if (_passengerConnection.Unrestrict(cpf))
                     return Ok("Passageiro retirado da lista de restritos com sucesso!");
                 else
                     return BadRequest("erro ao retirar da lista de restritos");
@@ -193,19 +193,19 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPost("undeletpassenger/{cpf}", Name = "Undelete Passenger")]
-        public ActionResult UndeletePassenger(string CPF)
+        public ActionResult UndeletePassenger(string cpf)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            if (_passengerConnection.FindPassengerDeleted(CPF) != null)
+            if (_passengerConnection.FindPassengerDeleted(cpf) != null)
             {
-                if (_passengerConnection.UndeletPassenger(CPF))
+                if (_passengerConnection.UndeletPassenger(cpf))
                     return Ok("Passageiro retirado da lista de deletados com sucesso!");
                 else
                     return BadRequest("erro ao retirar da lista de deletados");
@@ -214,21 +214,21 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPut("updatename/{cpf},{name}", Name = "Update Name Passenger")]
-        public ActionResult UpdateName(string CPF, string Name)
+        public ActionResult UpdateName(string cpf, string name)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
             if (passenger != null)
             {
-                passenger.Name = Name;
-                if (_passengerConnection.Update(CPF, passenger))
+                passenger.Name = name;
+                if (_passengerConnection.Update(cpf, passenger))
                     return Ok("Nome do Passageiro atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o nome do Passageiro");
@@ -238,24 +238,24 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPut("updategender/{cpf},{gender}", Name = "Update Gender Passenger")]
-        public ActionResult UpdateGender(string CPF, string Gender)
+        public ActionResult UpdateGender(string cpf, string gender)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            if (Gender.Length != 1)
+            if (gender.Length != 1)
                 return BadRequest("O campo genero aceita apenas um caractere");
 
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
             if (passenger != null)
             {
-                passenger.Gender = Gender;
-                if (_passengerConnection.Update(CPF, passenger))
+                passenger.Gender = gender;
+                if (_passengerConnection.Update(cpf, passenger))
                     return Ok("Genero do Passageiro atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o genero do Passageiro");
@@ -265,24 +265,24 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPut("updatephone/{cpf},{phone}", Name = "Update Phone Passenger")]
-        public ActionResult UpdatePhone(string CPF, string Phone)
+        public ActionResult UpdatePhone(string cpf, string phone)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
-            if (Phone.Length > 14)
+            if (phone.Length > 14)
                 return BadRequest("Digite um telefone valido");
 
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
             if (passenger != null)
             {
-                passenger.Phone = Phone;
-                if (_passengerConnection.Update(CPF, passenger))
+                passenger.Phone = phone;
+                if (_passengerConnection.Update(cpf, passenger))
                     return Ok("Telefone do Passageiro atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o telefone do Passageiro");
@@ -292,14 +292,14 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPut("updatedtbirth/{cpf}", Name = "Update Date Birth Passenger")]
-        public ActionResult UpdateDtBirth(string CPF, [FromBody] DateDTO DtBirth)
+        public ActionResult UpdateDtBirth(string cpf, [FromBody] DateDto DtBirth)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
             DateTime date;
@@ -311,11 +311,11 @@ namespace OnTheFly.PassengerService.Controllers.v1
             {
                 return BadRequest("Data invalida");
             }
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
             if (passenger != null)
             {
                 passenger.DtBirth = date;
-                if (_passengerConnection.Update(CPF, passenger))
+                if (_passengerConnection.Update(cpf, passenger))
                     return Ok("Data de nascimento do Passageiro atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar a data de nascimento do Passageiro");
@@ -325,14 +325,14 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPut("updateaddress/{cpf}", Name = "Update Address Passenger")]
-        public ActionResult UpdateAddress(string CPF, Address address)
+        public ActionResult UpdateAddress(string cpf, Address address)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
             address.Zipcode = address.Zipcode.Replace("-", "");
@@ -356,11 +356,11 @@ namespace OnTheFly.PassengerService.Controllers.v1
                     return BadRequest("O campo Street é obrigatorio");
             }
 
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
             if (passenger != null)
             {
                 passenger.Address = address;
-                if (_passengerConnection.Update(CPF, passenger))
+                if (_passengerConnection.Update(cpf, passenger))
                     return Ok("Endereço do Passageiro atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o endereço do Passageiro");
@@ -370,22 +370,22 @@ namespace OnTheFly.PassengerService.Controllers.v1
         }
 
         [HttpPut("changestatus/{cpf}", Name = "Change Status Passenger")]
-        public ActionResult ChangeStatus(string CPF)
+        public ActionResult ChangeStatus(string cpf)
         {
-            if (CPF == null || CPF.Equals("string") || CPF == "")
+            if (cpf == null || cpf.Equals("string") || cpf == "")
                 return BadRequest("CPF não informado!");
 
-            CPF = CPF.Replace(".", "").Replace("-", "");
+            cpf = cpf.Replace(".", "").Replace("-", "");
 
-            if (!Passenger.ValidateCPF(CPF))
+            if (!Passenger.ValidateCPF(cpf))
                 return BadRequest("CPF invalido");
 
 
-            var passenger = _passengerConnection.FindPassenger(CPF);
+            var passenger = _passengerConnection.FindPassenger(cpf);
             if (passenger != null)
             {
                 passenger.Status = !passenger.Status;
-                if (_passengerConnection.Update(CPF, passenger))
+                if (_passengerConnection.Update(cpf, passenger))
                     return Ok("Status do Passageiro atualizado com sucesso!");
                 else
                     return BadRequest("erro ao atualizar o status do Passageiro");

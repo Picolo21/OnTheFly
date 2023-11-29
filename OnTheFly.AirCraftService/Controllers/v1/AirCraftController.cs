@@ -37,20 +37,20 @@ namespace OnTheFly.AirCraftService.Controllers.v1
         }
 
         [HttpPost(Name = "Create Aircraft")]
-        public async Task<ActionResult<string>> CreateAirCraftAsync(AirCraftDTO airCraftDTO)
+        public async Task<ActionResult<string>> CreateAirCraftAsync(AirCraftDto airCraftDto)
         {
             #region company
-            airCraftDTO.Company = airCraftDTO.Company.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
-            Company? company = await _companyService.GetCompany(airCraftDTO.Company);
+            airCraftDto.Company = airCraftDto.Company.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
+            Company? company = await _companyService.GetCompany(airCraftDto.Company);
             if (company == null) return NotFound("Companhia não encontrada");
             #endregion
 
             #region rab
-            string rab = airCraftDTO.RAB.Replace("-", "");
+            string rab = airCraftDto.Rab.Replace("-", "");
             if (rab.Length != 5)
                 return BadRequest("Quantidade de caracteres de RAB inválida");
 
-            if (!AirCraft.RABValidation(rab))
+            if (!AirCraft.RabValidation(rab))
                 return BadRequest("RAB inválido");
 
             if (_airCraftConnection.FindByRAB(rab) != null)
@@ -61,7 +61,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             DateTime dateRegistry;
             try
             {
-                dateRegistry = DateTime.Parse(airCraftDTO.DtRegistry.Year + "/" + airCraftDTO.DtRegistry.Month + "/" + airCraftDTO.DtRegistry.Day);
+                dateRegistry = DateTime.Parse(airCraftDto.DtRegistry.Year + "/" + airCraftDto.DtRegistry.Month + "/" + airCraftDto.DtRegistry.Day);
             }
             catch
             {
@@ -69,12 +69,12 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             }
 
             DateTime? dateLastFlight;
-            if (airCraftDTO.DtLastFlight == null) dateLastFlight = null;
+            if (airCraftDto.DtLastFlight == null) dateLastFlight = null;
             else
             {
                 try
                 {
-                    dateLastFlight = DateTime.Parse(airCraftDTO.DtLastFlight.Year + "/" + airCraftDTO.DtLastFlight.Month + "/" + airCraftDTO.DtLastFlight.Day);
+                    dateLastFlight = DateTime.Parse(airCraftDto.DtLastFlight.Year + "/" + airCraftDto.DtLastFlight.Month + "/" + airCraftDto.DtLastFlight.Day);
                 }
                 catch
                 {
@@ -88,11 +88,11 @@ namespace OnTheFly.AirCraftService.Controllers.v1
 
             AirCraft airCraft = new AirCraft()
             {
-                Capacity = airCraftDTO.Capacity,
+                Capacity = airCraftDto.Capacity,
                 Company = company,
                 DtLastFlight = dateLastFlight,
                 DtRegistry = dateRegistry,
-                RAB = airCraftDTO.RAB
+                Rab = airCraftDto.Rab
             };
 
             var insertAircraft = _airCraftConnection.Insert(airCraft);
@@ -102,67 +102,67 @@ namespace OnTheFly.AirCraftService.Controllers.v1
         }
 
         [HttpPost("{rab}", Name = "Delete Aircraft")]
-        public async Task<ActionResult> DeleteAsync(string RAB)
+        public async Task<ActionResult> DeleteAsync(string rab)
         {
             #region rab
-            RAB = RAB.Replace("-", "");
-            if (RAB.Length != 5)
+            rab = rab.Replace("-", "");
+            if (rab.Length != 5)
                 return BadRequest("Quantidade de caracteres de RAB inválida");
 
-            if (!AirCraft.RABValidation(RAB))
+            if (!AirCraft.RabValidation(rab))
                 return BadRequest("RAB inválido");
             #endregion
 
-            if (_airCraftConnection.FindByRAB(RAB) == null) return BadRequest("Avião inexistente");
+            if (_airCraftConnection.FindByRAB(rab) == null) return BadRequest("Avião inexistente");
 
-            if (_airCraftConnection.Delete(RAB))
+            if (_airCraftConnection.Delete(rab))
                 return Ok("Avião deletado com sucesso!");
             return BadRequest("Erro ao deletar avião");
         }
 
-        [HttpPost("UndeleteAirCraft/{RAB}", Name = "Undelete Aircraft")]
-        public async Task<ActionResult> UndeleteAirCraftAsync(string RAB)
+        [HttpPost("UndeleteAirCraft/{rab}", Name = "Undelete Aircraft")]
+        public async Task<ActionResult> UndeleteAirCraftAsync(string rab)
         {
             #region rab
-            RAB = RAB.Replace("-", "");
-            if (RAB.Length != 5)
+            rab = rab.Replace("-", "");
+            if (rab.Length != 5)
                 return BadRequest("Quantidade de caracteres de RAB inválida");
 
-            if (!AirCraft.RABValidation(RAB))
+            if (!AirCraft.RabValidation(rab))
                 return BadRequest("RAB inválido");
             #endregion
 
-            if (_airCraftConnection.FindByRABDeleted(RAB) == null) return BadRequest("Avião inexistente");
+            if (_airCraftConnection.FindByRABDeleted(rab) == null) return BadRequest("Avião inexistente");
 
-            if (_airCraftConnection.UndeleteAirCraft(RAB))
+            if (_airCraftConnection.UndeleteAirCraft(rab))
                 return Ok("Avião retirado da lista dos deletados com sucesso!");
             return BadRequest("Erro ao retirar avião da lista dos deletados");
         }
 
         [HttpPut("UpdateCapacity/{RAB},{capacity}", Name = "Update Capacity")]
-        public async Task<ActionResult<string>> UpdateCapacityAsync(string RAB, int capacity)
+        public async Task<ActionResult<string>> UpdateCapacityAsync(string rab, int capacity)
         {
             #region rab
-            RAB = RAB.Replace("-", "");
-            if (RAB.Length != 5)
+            rab = rab.Replace("-", "");
+            if (rab.Length != 5)
                 return BadRequest("Quantidade de caracteres de RAB inválida");
 
-            if (!AirCraft.RABValidation(RAB))
+            if (!AirCraft.RabValidation(rab))
                 return BadRequest("RAB inválido");
             #endregion
 
-            AirCraft? aircraft = _airCraftConnection.FindByRAB(RAB);
+            AirCraft? aircraft = _airCraftConnection.FindByRAB(rab);
             if (aircraft == null) return NotFound("Avião não encontrado");
 
             aircraft.Capacity = capacity;
 
-            if (_airCraftConnection.Update(RAB, aircraft))
+            if (_airCraftConnection.Update(rab, aircraft))
                 return Ok("Capacidade do avião atualizada com sucesso!");
             return BadRequest("Não foi possível atualizar a capacidade do avião");
         }
 
         [HttpPut("{RAB}", Name = "Update Date Last Flight")]
-        public async Task<ActionResult<string>> UpdateDtLastFlightAsync(string RAB, DateDTO dtLastFlight)
+        public async Task<ActionResult<string>> UpdateDtLastFlightAsync(string rab, DateDto dtLastFlight)
         {
             #region Date
             DateTime date;
@@ -179,15 +179,15 @@ namespace OnTheFly.AirCraftService.Controllers.v1
             #endregion
 
             #region rab
-            RAB = RAB.Replace("-", "");
-            if (RAB.Length != 5)
+            rab = rab.Replace("-", "");
+            if (rab.Length != 5)
                 return BadRequest("Quantidade de caracteres de RAB inválida");
 
-            if (!AirCraft.RABValidation(RAB))
+            if (!AirCraft.RabValidation(rab))
                 return BadRequest("RAB inválido");
             #endregion
 
-            AirCraft? aircraft = _airCraftConnection.FindByRAB(RAB);
+            AirCraft? aircraft = _airCraftConnection.FindByRAB(rab);
             if (aircraft == null) return NotFound("Avião não encontrado");
 
             if (aircraft.DtRegistry.Subtract(date).TotalDays > 0)
@@ -195,7 +195,7 @@ namespace OnTheFly.AirCraftService.Controllers.v1
 
             aircraft.DtLastFlight = date;
 
-            if (_airCraftConnection.Update(RAB, aircraft))
+            if (_airCraftConnection.Update(rab, aircraft))
                 return Ok("Data de último voo do avião atualizada com sucesso!");
             return BadRequest("Não foi possível atualizar a data de último voo do avião");
         }

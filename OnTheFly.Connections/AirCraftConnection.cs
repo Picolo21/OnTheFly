@@ -17,7 +17,7 @@ namespace OnTheFly.Connections
         {
             var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
             collection.InsertOne(airCraft);
-            var res = collection.Find(a => a.RAB == airCraft.RAB).FirstOrDefault();
+            var res = collection.Find(a => a.Rab == airCraft.Rab).FirstOrDefault();
             return res;
         }
 
@@ -27,17 +27,17 @@ namespace OnTheFly.Connections
             return collection.Find<AirCraft>(a => true).ToList();
         }
 
-        public AirCraft FindByRAB(string RAB)
+        public AirCraft FindByRAB(string rab)
         {
             var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-            var t= collection.Find(a => a.RAB == RAB).FirstOrDefault();
-            return collection.Find(a => a.RAB == RAB).FirstOrDefault();
+            var t= collection.Find(a => a.Rab == rab).FirstOrDefault();
+            return collection.Find(a => a.Rab == rab).FirstOrDefault();
         }
 
-        public AirCraft FindByRABDeleted(string RAB)
+        public AirCraft FindByRABDeleted(string rab)
         {
             var collectionDeleted = _database.GetCollection<AirCraft>("DeletedAirCrafts");
-            return collectionDeleted.Find(a => a.RAB == RAB).FirstOrDefault();
+            return collectionDeleted.Find(a => a.Rab == rab).FirstOrDefault();
         }
 
         public bool Delete(string rab)
@@ -71,13 +71,13 @@ namespace OnTheFly.Connections
         public bool Update(string rab, AirCraft airCraft)
         {
             var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-            return collection.ReplaceOne(a => a.RAB == rab, airCraft).IsAcknowledged;
+            return collection.ReplaceOne(a => a.Rab == rab, airCraft).IsAcknowledged;
         }
 
         public AirCraft? PatchDate(string rab, DateTime date)
         {
             var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-            AirCraft? airCraft = collection.Find(a => a.RAB == rab).FirstOrDefault();
+            AirCraft? airCraft = collection.Find(a => a.Rab == rab).FirstOrDefault();
             if (airCraft == null) return null;
 
             airCraft.DtLastFlight = date;
