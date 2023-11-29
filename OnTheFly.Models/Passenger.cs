@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
-using System.Xml.XPath;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using OnTheFly.Models.DTO;
+using System.ComponentModel.DataAnnotations;
 
 namespace OnTheFly.Models
 {
@@ -11,21 +8,21 @@ namespace OnTheFly.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         [StringLength(14)]
-        public string CPF { get; set; }
+        public string? Cpf { get; set; }
         [StringLength(30)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         [StringLength(1)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
         [StringLength(14)]
         public string? Phone { get; set; }
-        public DateTime DtBirth { get; set; }
-        public DateTime DtRegister { get; set; }
+        public DateTime DateBirth { get; set; }
+        public DateTime DateRegister { get; set; }
         public bool Status { get; set; }
-        public Address Address { get; set; }
+        public Address? Address { get; set; }
 
-        public static bool ValidateCPF(string cpf)
+        public static bool ValidateCpf(string cpf)
         {
             if (cpf.Length != 11) return false;
 
@@ -83,8 +80,8 @@ namespace OnTheFly.Models
         }
         public static int ValidateAge(Passenger passenger)
         {
-            var result = DateTime.Now.Year - passenger.DtBirth.Year; 
-            if (DateTime.Now.Month < passenger.DtBirth.Month || (DateTime.Now.Month == passenger.DtBirth.Month && DateTime.Now.Day < passenger.DtBirth.Day))
+            var result = DateTime.Now.Year - passenger.DateBirth.Year; 
+            if (DateTime.Now.Month < passenger.DateBirth.Month || (DateTime.Now.Month == passenger.DateBirth.Month && DateTime.Now.Day < passenger.DateBirth.Day))
             {
                 result--;
             }
