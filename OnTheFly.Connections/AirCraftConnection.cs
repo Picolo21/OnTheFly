@@ -27,14 +27,14 @@ public class AirCraftConnection
         return collection.Find<AirCraft>(a => true).ToList();
     }
 
-    public AirCraft FindByRAB(string rab)
+    public AirCraft FindByRab(string rab)
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
         var t= collection.Find(a => a.Rab == rab).FirstOrDefault();
         return collection.Find(a => a.Rab == rab).FirstOrDefault();
     }
 
-    public AirCraft FindByRABDeleted(string rab)
+    public AirCraft FindByRabDeleted(string rab)
     {
         var collectionDeleted = _database.GetCollection<AirCraft>("DeletedAirCrafts");
         return collectionDeleted.Find(a => a.Rab == rab).FirstOrDefault();

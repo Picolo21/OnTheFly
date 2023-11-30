@@ -21,7 +21,7 @@ public class AirCraftController : ControllerBase
     }
 
     [HttpGet(Name = "Get All Aircraft")]
-    public async Task<ActionResult<List<AirCraft>>> GetAirCraftAsync()
+    public async Task<ActionResult<List<AirCraft>>> GetAllAirCraftAsync()
     {
         if (_airCraftConnection.FindAll().Count == 0)
         {
@@ -31,9 +31,9 @@ public class AirCraftController : ControllerBase
     }
 
     [HttpGet("{rab}", Name = "Get Aircraft by RAB")]
-    public async Task<ActionResult<AirCraft>> GetAirCraftByRABAsync(string RAB)
+    public async Task<ActionResult<AirCraft>> GetAirCraftByRabAsync(string rab)
     {
-        return _airCraftConnection.FindByRAB(RAB);
+        return _airCraftConnection.FindByRab(rab);
     }
 
     [HttpPost(Name = "Create Aircraft")]
@@ -41,7 +41,7 @@ public class AirCraftController : ControllerBase
     {
         #region company
         airCraftDto.Company = airCraftDto.Company.Replace("%2F", "").Replace(".", "").Replace("-", "").Replace("/", "");
-        Company? company = await _companyService.GetCompany(airCraftDto.Company);
+        Company? company = await _companyService.GetCompanyAsync(airCraftDto.Company);
         if (company == null) return NotFound("Companhia não encontrada");
         #endregion
 
@@ -53,7 +53,7 @@ public class AirCraftController : ControllerBase
         if (!AirCraft.RabValidation(rab))
             return BadRequest("RAB inválido");
 
-        if (_airCraftConnection.FindByRAB(rab) != null)
+        if (_airCraftConnection.FindByRab(rab) != null)
             return BadRequest("O mesmo RAB já está registrado no banco");
         #endregion
 
@@ -102,7 +102,7 @@ public class AirCraftController : ControllerBase
     }
 
     [HttpPost("{rab}", Name = "Delete Aircraft")]
-    public async Task<ActionResult> DeleteAsync(string rab)
+    public async Task<ActionResult> DeleteAirCraftAsync(string rab)
     {
         #region rab
         rab = rab.Replace("-", "");
@@ -113,14 +113,16 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        if (_airCraftConnection.FindByRAB(rab) == null) return BadRequest("Avião inexistente");
+        if (_airCraftConnection.FindByRab(rab) == null) 
+            return BadRequest("Avião inexistente");
 
         if (_airCraftConnection.Delete(rab))
             return Ok("Avião deletado com sucesso!");
+
         return BadRequest("Erro ao deletar avião");
     }
 
-    [HttpPost("UndeleteAirCraft/{rab}", Name = "Undelete Aircraft")]
+    [HttpPost("{rab}", Name = "Undelete Aircraft")]
     public async Task<ActionResult> UndeleteAirCraftAsync(string rab)
     {
         #region rab
@@ -132,14 +134,16 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        if (_airCraftConnection.FindByRABDeleted(rab) == null) return BadRequest("Avião inexistente");
+        if (_airCraftConnection.FindByRabDeleted(rab) == null) 
+            return BadRequest("Avião inexistente");
 
         if (_airCraftConnection.UndeleteAirCraft(rab))
             return Ok("Avião retirado da lista dos deletados com sucesso!");
+
         return BadRequest("Erro ao retirar avião da lista dos deletados");
     }
 
-    [HttpPut("UpdateCapacity/{RAB},{capacity}", Name = "Update Capacity")]
+    [HttpPut("{rab}/{capacity}", Name = "Update Capacity")]
     public async Task<ActionResult<string>> UpdateCapacityAsync(string rab, int capacity)
     {
         #region rab
@@ -151,7 +155,7 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        AirCraft? aircraft = _airCraftConnection.FindByRAB(rab);
+        AirCraft? aircraft = _airCraftConnection.FindByRab(rab);
         if (aircraft == null) return NotFound("Avião não encontrado");
 
         aircraft.Capacity = capacity;
@@ -161,19 +165,20 @@ public class AirCraftController : ControllerBase
         return BadRequest("Não foi possível atualizar a capacidade do avião");
     }
 
-    [HttpPut("{RAB}", Name = "Update Date Last Flight")]
-    public async Task<ActionResult<string>> UpdateDtLastFlightAsync(string rab, DateDto dtLastFlight)
+    [HttpPut("{rab}", Name = "Update Date Last Flight")]
+    public async Task<ActionResult<string>> UpdateDateLastFlightAsync(string rab, DateDto dateLastFlight)
     {
         #region Date
         DateTime date;
         try
         {
-            date = DateTime.Parse(dtLastFlight.Year + "/" + dtLastFlight.Month + "/" + dtLastFlight.Day);
+            date = DateTime.Parse(dateLastFlight.Year + "/" + dateLastFlight.Month + "/" + dateLastFlight.Day);
         }
         catch
         {
             return BadRequest("A data informada é inválida! Por favor, informe uma data de último voo válida");
         }
+
         if (DateTime.Now.Subtract(date).TotalDays < 0)
             return BadRequest("A data informada é inválida! Por favor, informe uma data de último voo válida");
         #endregion
@@ -187,8 +192,9 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        AirCraft? aircraft = _airCraftConnection.FindByRAB(rab);
-        if (aircraft == null) return NotFound("Avião não encontrado");
+        AirCraft? aircraft = _airCraftConnection.FindByRab(rab);
+        if (aircraft == null) 
+            return NotFound("Avião não encontrado");
 
         if (aircraft.DateRegistry.Subtract(date).TotalDays > 0)
             return BadRequest("O último voo não pode ser antes da data de registro do avião");
@@ -197,6 +203,7 @@ public class AirCraftController : ControllerBase
 
         if (_airCraftConnection.Update(rab, aircraft))
             return Ok("Data de último voo do avião atualizada com sucesso!");
+
         return BadRequest("Não foi possível atualizar a data de último voo do avião");
     }
 }
