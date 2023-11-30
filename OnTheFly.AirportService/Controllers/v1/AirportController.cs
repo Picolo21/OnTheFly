@@ -3,68 +3,80 @@ using OnTheFly.AirportService.Services;
 using OnTheFly.Connections;
 using OnTheFly.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace OnTheFly.AirportService.Controllers.v1
+namespace OnTheFly.AirportService.Controllers.v1;
+
+[Route("api/v1/airports")]
+[ApiController]
+
+public class AirportController : ControllerBase
 {
-    [Route("api/v1/airports")]
-    [ApiController]
+    private readonly AirportConnection _airport;
+    private readonly StateConnection _state;
 
-    public class AirportController : ControllerBase
+    public AirportController(AirportConnection airport, StateConnection state)
     {
-        private readonly AirportConnection _airport;
-        private readonly StateConnection _state;
+        _airport = airport;
+        _state = state;
+    }
 
-        public AirportController(AirportConnection airport, StateConnection state)
-        {
-            _airport = airport;
-            _state = state;
-        }
+    [HttpGet(Name = "Get All Airports")]
+    public async Task<ActionResult<List<Airport>>> GetAllAirportsAsync()
+    {
+        List<Airport> airports = await _airport.GetAllAirportsAsync();
 
-        [HttpGet("{iata}", Name = "GetAllAirport")]
-        public ActionResult<Airport> Get(string iata)
-        {
-            Airport airport = _airport.Get(iata);
-            if (airport == null)
-                return NotFound();
+        return airports;
+    }
 
-            State state = _state.GetUF(airport.State);
-            if (state == null) airport.State = "null";
-            else airport.State = state.Uf;
+    [HttpGet("{iata}", Name = "Get Airport By IATA")]
+    public async Task<ActionResult<Airport>> GetAirportAsync(string iata)
+    {
+        Airport airport = await _airport.GetAirportByIataAsync(iata);
 
-            return airport;
-        }
+        if (airport == null)
+            return NotFound();
 
-        [HttpGet("{state}", Name = "GetAirportState")]
-        public ActionResult<List<Airport>> GetByState(string state)
-        {
-            var airport = _airport.GetByState(state);
+        State state = _state.GetUf(airport.State);
 
-            if (airport.Count == 0)
-                return NotFound();
+        if (state == null) 
+            airport.State = "null";
+        else 
+            airport.State = state.Uf;
 
-            return airport;
-        }
+        return airport;
+    }
 
-        [HttpGet("{city}", Name = "GetAirportByCity")]
-        public ActionResult<List<Airport>> GetByCityName(string city)
-        {
-            var airport = _airport.GetByCityName(city);
+    [HttpGet("{state}", Name = "Get Airports By State")]
+    public async Task<ActionResult<List<Airport>>> GetAirportsByStateAsync(string state)
+    {
+        var airport = await _airport.GetAirportByStateAsync(state);
 
-            if (airport.Count == 0)
-                return NotFound();
+        if (airport.Count == 0)
+            return NotFound();
 
-            return airport;
-        }
+        return airport;
+    }
 
-        [HttpGet("{country}", Name = "GetAirportByCountry")]
-        public ActionResult<List<Airport>> GetByCountry(string country)
-        {
-            var airport = _airport.GetByCountry(country);
+    [HttpGet("{city}", Name = "Get Airports By City")]
+    public async Task<ActionResult<List<Airport>>> GetAirportsByCityAsync(string city)
+    {
+        var airport = await _airport.GetAirportByCityAsync(city);
 
-            if (airport.Count == 0)
-                return NotFound();
+        if (airport.Count == 0)
+            return NotFound();
 
-            return airport;
-        }
+        return airport;
+    }
+
+    [HttpGet("{country}", Name = "Get Airports By Country")]
+    public async Task<ActionResult<List<Airport>>> GetAirportsByCountryAsync(string country)
+    {
+        var airport = await _airport.GetAirportByCountryAsync(country);
+
+        if (airport.Count == 0)
+            return NotFound();
+
+        return airport;
     }
 }
