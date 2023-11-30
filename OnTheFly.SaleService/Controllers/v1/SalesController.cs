@@ -33,7 +33,7 @@ public class SalesController : ControllerBase
     [HttpGet(Name = "Get All Sales")]
     public async Task<ActionResult<string>> GetAllSalesAsync()
     {
-        var sales = _saleConnection.FindAll();
+        var sales = await _saleConnection.FindAllAsync();
         if (sales == null)
             return NoContent();
 
@@ -54,7 +54,7 @@ public class SalesController : ControllerBase
             return BadRequest("Data invalida");
         }
 
-        Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
+        Sale? sale = await _saleConnection.FindSaleAsync(cpf, iata, rab, date);
         if (sale == null)
             return NotFound("Venda não encontrada");
 
@@ -188,12 +188,12 @@ public class SalesController : ControllerBase
             return BadRequest("Data invalida");
         }
 
-        Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
+        Sale? sale = await _saleConnection.FindSaleAsync(cpf, iata, rab, date);
 
         if (sale == null) 
             return NotFound("Venda não encontrada");
 
-        _saleConnection.Delete(cpf, iata, rab, date);
+        await _saleConnection.DeleteAsync(cpf, iata, rab, date);
 
         return Ok("Deletado com sucesso");
     }
@@ -213,7 +213,7 @@ public class SalesController : ControllerBase
             return BadRequest("Data invalida");
         }
 
-        Sale? sale = _saleConnection.FindSale(cpf, iata, rab, date);
+        Sale? sale = await _saleConnection.FindSaleAsync(cpf, iata, rab, date);
 
         if (sale == null) 
             return NotFound("Venda não encontrada");

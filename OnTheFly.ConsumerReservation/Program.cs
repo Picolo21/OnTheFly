@@ -41,7 +41,7 @@ internal class Program
                             {
                                 try
                                 {
-                                    saleConnection.Insert(sale);
+                                    saleConnection.InsertAsync(sale);
                                     finish = false;
                                 }
                                 catch (Exception ex)
