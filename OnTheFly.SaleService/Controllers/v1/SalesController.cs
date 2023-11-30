@@ -86,7 +86,7 @@ public class SalesController : ControllerBase
             return BadRequest("Data invalida");
         }
 
-        Flight? flight = _flight.Get(saleDto.Iata, rab, BsonDateTime.Create(date));
+        Flight? flight = await _flight.GetAsync(saleDto.Iata, rab, BsonDateTime.Create(date));
         if (flight == null)
             return NotFound("Voo não encontrado");
 
