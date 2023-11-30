@@ -1,7 +1,6 @@
 ﻿using DocumentValidator;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using OnTheFly.CompanyService.Services.v1;
 using OnTheFly.Connections;
 using OnTheFly.Models;
 using OnTheFly.Models.DTO;

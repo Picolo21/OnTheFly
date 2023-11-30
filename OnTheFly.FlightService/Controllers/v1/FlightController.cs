@@ -29,7 +29,7 @@ public class FlightController : ControllerBase
     [HttpGet(Name = "Get All Flights")]
     public async Task<ActionResult<List<Flight>>> GetAllFlightsAsync()
     {
-        List<Flight> flights = _flight.FindAll();
+        List<Flight> flights = await _flight.FindAllAsync();
 
         if (flights.Count == 0)
             return NotFound("Nenhum avião encontrado");
@@ -53,7 +53,7 @@ public class FlightController : ControllerBase
 
         BsonDateTime bsonDate = BsonDateTime.Create(date);
 
-        Flight? flight = _flight.Get(iata, rab, bsonDate);
+        Flight? flight = await _flight.GetAsync(iata, rab, bsonDate);
 
         if (flight == null) return NotFound("Voo não encontrado");
 
@@ -91,7 +91,7 @@ public class FlightController : ControllerBase
 
         // Atualizar data de último voo de aircraft para a data do voo
         aircraft.DateLastFlight = date;
-        Flight? flightaux = _flight.Get(flightDto.Iata, flightDto.Rab, BsonDateTime.Create(date));
+        Flight? flightaux = await _flight.GetAsync(flightDto.Iata, flightDto.Rab, BsonDateTime.Create(date));
 
         if (flightaux != null)
             return BadRequest("voo nao pode se repetir");
@@ -100,7 +100,7 @@ public class FlightController : ControllerBase
         if (_aircraft.UpdateAircraftAsync(aircraft.Rab, date) == null) return BadRequest("Impossível atualizar última data de voo do avião");
 
         // Inserção de flight
-        Flight? flight = _flight.Insert(flightDto, aircraft, airport, date);
+        Flight? flight = await _flight.InsertAsync(flightDto, aircraft, airport, date);
 
         if (flight == null) return BadRequest("Não foi possivel enviar voo para o banco");
         return Ok("Voo armazenado no banco com sucesso!");
@@ -121,7 +121,7 @@ public class FlightController : ControllerBase
 
         BsonDateTime bsonDate = BsonDateTime.Create(departureDt);
 
-        if (!_flight.Delete(iata, rab, departureDt))
+        if (await _flight.DeleteAsync(iata, rab, departureDt) is false)
             return BadRequest("Não foi possível deletar o voo");
 
         return Ok("Voo deletado com sucesso!");
@@ -139,7 +139,7 @@ public class FlightController : ControllerBase
 
         BsonDateTime bsonDate = BsonDateTime.Create(departureDt);
 
-        Flight? flight = _flight.Get(iata, rab, bsonDate);
+        Flight? flight = await _flight.GetAsync(iata, rab, bsonDate);
         if (flight == null) return NotFound("Voo não encontrado");
 
         if (!_flight.UpdateStatus(iata, rab, bsonDate))
@@ -159,7 +159,7 @@ public class FlightController : ControllerBase
 
         BsonDateTime bsonDate = BsonDateTime.Create(departureDt);
 
-        Flight? flight = _flight.Get(iata, rab, bsonDate);
+        Flight? flight = await _flight.GetAsync(iata, rab, bsonDate);
         if (flight == null) return NotFound("Voo não encontrado");
 
         if (!_flight.UpdateSales(iata, rab, bsonDate, salesNumber))
