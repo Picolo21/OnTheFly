@@ -37,7 +37,7 @@ public class AirportController : ControllerBase
         if (airport == null)
             return NotFound();
 
-        State state = _state.GetUf(airport.State);
+        State state = await _state.GetUfAsync(airport.State);
 
         if (state == null) 
             airport.State = "null";

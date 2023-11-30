@@ -13,10 +13,10 @@ public class StateConnection
         Database = client.GetDatabase("Airport");
     }
 
-    public State? GetUf(string name)
+    public async Task<State?> GetUfAsync(string name)
     {
         var collection = Database.GetCollection<State>("States");
-        State? state = collection.Find(s => s.Name == name).FirstOrDefault();
+        State? state = await collection.Find(s => s.Name == name).FirstOrDefaultAsync();
         return state;
     }
 }
