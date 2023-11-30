@@ -1,172 +1,160 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using OnTheFly.Models;
-using OnTheFly.Models.DTO;
 
-namespace OnTheFly.Connections
+namespace OnTheFly.Connections;
+
+public class CompanyConnection
 {
-    public class CompanyConnection
+    private IMongoDatabase _dataBase;
+
+    public CompanyConnection()
     {
-        private IMongoDatabase _dataBase;
+        var client = new MongoClient("mongodb://localhost:27017");
+        _dataBase = client.GetDatabase("Company");
+    }
 
-        public CompanyConnection()
-        {
-            var client = new MongoClient("mongodb://localhost:27017");
-            _dataBase = client.GetDatabase("Company");
-        }
+    public async Task<Company> InsertAsync(Company company)
+    {
+        var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+        collection.InsertOne(company);
+        var companyResult = await collection.Find(c => c.Cnpj == company.Cnpj).FirstOrDefaultAsync();
+        return companyResult;
+    }
 
-        public Company Insert(Company company)
+    public async Task<List<Company>> FindAllAsync()
+    {
+        var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+        return await collection.Find(x => true).ToListAsync();
+    }
+
+    public async Task<Company> FindByCnpjAsync(string cnpj)
+    {
+        var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+        return await collection.Find(x => x.Cnpj == cnpj).FirstOrDefaultAsync();
+    }
+
+    public async Task<Company> FindByCnpjRestrictedAsync(string cnpj)
+    {
+        var collection = _dataBase.GetCollection<Company>("RestrictedCompanies");
+        return await collection.Find(x => x.Cnpj == cnpj).FirstOrDefaultAsync();
+    }
+
+    public async Task<Company> FindByCnpjDeletedAsync(string cnpj)
+    {
+        var collection = _dataBase.GetCollection<Company>("DeletedCompanies");
+        return await collection.Find(x => x.Cnpj == cnpj).FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> DeleteAsync(string cnpj)
+    {
+        try
         {
             var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-            collection.InsertOne(company);
-            var com = collection.Find(c => c.Cnpj == company.Cnpj).FirstOrDefault();
-            return com;
-        }
+            var collectioRestricted = _dataBase.GetCollection<Company>("RestrictedCompanies");
+            var collectionDeleted = _dataBase.GetCollection<Company>("DeletedCompanies");
 
-        public List<Company> FindAll()
-        {
-            var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-            return collection.Find(x => true).ToList();
-        }
-
-        public Company FindByCnpj(string cnpj)
-        {
-            var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-            return collection.Find(x => x.Cnpj == cnpj).FirstOrDefault();
-        }
-
-        public Company FindByCnpjRestricted(string cnpj)
-        {
-            var collection = _dataBase.GetCollection<Company>("RestrictedCompanies");
-            return collection.Find(x => x.Cnpj == cnpj).FirstOrDefault();
-        }
-
-        public Company FindByCnpjDeleted(string cnpj)
-        {
-            var collection = _dataBase.GetCollection<Company>("DeletedCompanies");
-            return collection.Find(x => x.Cnpj == cnpj).FirstOrDefault();
-        }
-
-        public bool Delete(string cnpj)
-        {
-            try
+            var trash = await collection.FindOneAndDeleteAsync(c => c.Cnpj == cnpj);
+            if (trash == null)
             {
-                var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-                var collectioRestricted = _dataBase.GetCollection<Company>("RestrictedCompanies");
-                var collectionDeleted = _dataBase.GetCollection<Company>("DeletedCompanies");
-
-                var trash = collection.FindOneAndDelete(c => c.Cnpj == cnpj);
-                if (trash == null)
-                {
-                    var trashRestricted = collectioRestricted.FindOneAndDelete(c => c.Cnpj == cnpj);
-                    if (trashRestricted == null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        collectionDeleted.InsertOne(trashRestricted);
-                        return true;
-                    }
-                }
-                else
-                {
-                    collectionDeleted.InsertOne(trash);
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public bool Restrict(string cnpj)
-        {
-            try
-            {
-                var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-                var collectioRestricted = _dataBase.GetCollection<Company>("RestrictedCompanies");
-
-                var company = collection.FindOneAndDelete(c => c.Cnpj == cnpj);
-                if (company == null)
-                {
+                var trashRestricted = await collectioRestricted.FindOneAndDeleteAsync(c => c.Cnpj == cnpj);
+                if (trashRestricted == null)
                     return false;
-                }
                 else
                 {
-                    collectioRestricted.InsertOne(company);
+                    await collectionDeleted.InsertOneAsync(trashRestricted);
                     return true;
                 }
             }
-            catch
+            else
             {
-                return false;
+                await collectionDeleted.InsertOneAsync(trash);
+                return true;
             }
         }
-
-        public bool Unrestrict(string cnpj)
+        catch
         {
-            try
-            {
-                var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-                var collectioRestricted = _dataBase.GetCollection<Company>("RestrictedCompanies");
-
-                var restricted = collectioRestricted.FindOneAndDelete(c => c.Cnpj == cnpj);
-                if (restricted == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    collection.InsertOne(restricted);
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
+            return false;
         }
+    }
 
-        public bool UndeleteCompany(string cnpj)
-        {
-            try
-            {
-                var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-                var collectioDeleted = _dataBase.GetCollection<Company>("DeletedCompanies");
-
-                var deleted = collectioDeleted.FindOneAndDelete(c => c.Cnpj == cnpj);
-                if (deleted == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    collection.InsertOne(deleted);
-                    return true;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public bool Update(string cnpj, Company company)
+    public async Task<bool> RestrictAsync(string cnpj)
+    {
+        try
         {
             var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-            return collection.ReplaceOne(c=> c.Cnpj==cnpj, company).IsAcknowledged;
-        }
+            var collectioRestricted = _dataBase.GetCollection<Company>("RestrictedCompanies");
 
-        public void UpdateStatus(string cnpj, bool status)
+            var company = await collection.FindOneAndDeleteAsync(c => c.Cnpj == cnpj);
+            if (company == null)
+                return false;
+            else
+            {
+                await collectioRestricted.InsertOneAsync(company);
+                return true;
+            }
+        }
+        catch
         {
-            var filter = Builders<Company>.Filter.Eq("Cnpj", cnpj);
-            var update = Builders<Company>.Update.Set("Status", status);
-
-            var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
-            collection.UpdateOne(filter, update);
+            return false;
         }
+    }
+
+    public async Task<bool> UnrestrictAsync(string cnpj)
+    {
+        try
+        {
+            var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+            var collectioRestricted = _dataBase.GetCollection<Company>("RestrictedCompanies");
+
+            var restricted = await collectioRestricted.FindOneAndDeleteAsync(c => c.Cnpj == cnpj);
+            if (restricted == null)
+                return false;
+            else
+            { 
+                await collection.InsertOneAsync(restricted);
+                return true;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> UndeleteCompanyAsync(string cnpj)
+    {
+        try
+        {
+            var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+            var collectioDeleted = _dataBase.GetCollection<Company>("DeletedCompanies");
+
+            var deleted = await collectioDeleted.FindOneAndDeleteAsync(c => c.Cnpj == cnpj);
+            if (deleted == null)
+                return false;
+            else
+            {
+                await collection.InsertOneAsync(deleted);
+                return true;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool Update(string cnpj, Company company)
+    {
+        var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+        return collection.ReplaceOne(c=> c.Cnpj==cnpj, company).IsAcknowledged;
+    }
+
+    public async Task UpdateStatusAsync(string cnpj, bool status)
+    {
+        var filter = Builders<Company>.Filter.Eq("Cnpj", cnpj);
+        var update = Builders<Company>.Update.Set("Status", status);
+
+        var collection = _dataBase.GetCollection<Company>("ActivatedCompanies");
+        await collection.UpdateOneAsync(filter, update);
     }
 }

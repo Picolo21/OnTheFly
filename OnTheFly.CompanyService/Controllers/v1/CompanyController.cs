@@ -15,26 +15,23 @@ public class CompanyController : ControllerBase
 {
     private readonly CompanyConnection _companyConnection;
     private readonly PostOfficesService _postOfficeService;
-    private readonly AircraftService _aircraftService;
 
     public CompanyController(
         CompanyConnection companyConnection,
-        PostOfficesService postOfficeService,
-        AircraftService aircraftService)
+        PostOfficesService postOfficeService)
     {
         _companyConnection = companyConnection;
         _postOfficeService = postOfficeService;
-        _aircraftService = aircraftService;
     }
 
     [HttpGet(Name = "Get All Companies")]
     public async Task<ActionResult<List<Company>>> GetCompanyAsync()
     {
-        if (_companyConnection.FindAll().Count == 0)
+        if (_companyConnection.FindAllAsync().Equals(0))
         {
             return NotFound("Nenhuma companhia cadastrada");
         }
-        return _companyConnection.FindAll();
+        return await _companyConnection.FindAllAsync();
     }
 
     [HttpGet("{cnpj}", Name = "Get Company by CNPJ")]
@@ -44,10 +41,10 @@ public class CompanyController : ControllerBase
         if (!CnpjValidation.Validate(cnpj))
             return BadRequest("Cnpj Invalido");
 
-        if (_companyConnection.FindByCnpj(cnpj) == null)
+        if (_companyConnection.FindByCnpjAsync(cnpj) == null)
             return NotFound("O CNPJ informado nao encontrado");
 
-        return _companyConnection.FindByCnpj(cnpj);
+        return await _companyConnection.FindByCnpjAsync(cnpj);
     }
 
     [HttpPost(Name = "Create Company")]
@@ -119,7 +116,7 @@ public class CompanyController : ControllerBase
             Status = companyDto.Status
         };
 
-        var insertCompany = _companyConnection.Insert(company);
+        var insertCompany = await _companyConnection.InsertAsync(company);
         if (insertCompany != null)
             return Created("", "Inserido com sucesso!\n\n" + JsonConvert.SerializeObject(insertCompany, Formatting.Indented));
         return BadRequest("Erro ao inserir Companhia!");
@@ -137,13 +134,14 @@ public class CompanyController : ControllerBase
         if (!CnpjValidation.Validate(cnpj))
             return BadRequest("CNPJ invalido");
 
-        if (_companyConnection.FindByCnpj(cnpj) != null || _companyConnection.FindByCnpjRestricted(cnpj) != null)
+        if (_companyConnection.FindByCnpjAsync(cnpj) != null || _companyConnection.FindByCnpjRestrictedAsync(cnpj) != null)
         {
-            if (_companyConnection.Delete(cnpj))
+            if (await _companyConnection.DeleteAsync(cnpj))
                 return Ok("companhia deletada com sucesso!");
             else
                 return BadRequest("erro ao deletar");
         }
+
         return BadRequest("companhia inexistente");
     }
 
@@ -158,13 +156,14 @@ public class CompanyController : ControllerBase
         if (!CnpjValidation.Validate(cnpj))
             return BadRequest("CNPJ invalido");
 
-        if (_companyConnection.FindByCnpj(cnpj) != null)
+        if (_companyConnection.FindByCnpjAsync(cnpj) != null)
         {
-            if (_companyConnection.Restrict(cnpj))
+            if (await _companyConnection.RestrictAsync(cnpj))
                 return Ok("Companhia restrita com sucesso!");
             else
                 return BadRequest("erro ao restringir");
         }
+
         return BadRequest("Companhia inexistente");
     }
 
@@ -179,13 +178,14 @@ public class CompanyController : ControllerBase
         if (!CnpjValidation.Validate(cnpj))
             return BadRequest("CNPJ invalido");
 
-        if (_companyConnection.FindByCnpjRestricted(cnpj) != null)
+        if (_companyConnection.FindByCnpjRestrictedAsync(cnpj) != null)
         {
-            if (_companyConnection.Unrestrict(cnpj) != null)
+            if (_companyConnection.UnrestrictAsync(cnpj) != null)
                 return Ok("Companhia retirada da lista de restritos com sucesso!");
             else
                 return BadRequest("erro ao retirar da lista de restritos");
         }
+
         return BadRequest("Companhia nao esta na lista de restritos");
     }
 
@@ -200,9 +200,9 @@ public class CompanyController : ControllerBase
         if (!CnpjValidation.Validate(cnpj))
             return BadRequest("CNPJ invalido");
 
-        if (_companyConnection.FindByCnpjDeleted(cnpj) != null)
+        if (_companyConnection.FindByCnpjDeletedAsync(cnpj) != null)
         {
-            if (_companyConnection.UndeleteCompany(cnpj))
+            if (await _companyConnection.UndeleteCompanyAsync(cnpj))
                 return Ok("Companhia retirada da lista de deletados com sucesso!");
             else
                 return BadRequest("erro ao retirar da lista de deletados");
@@ -221,7 +221,7 @@ public class CompanyController : ControllerBase
         if (!CnpjValidation.Validate(cnpj))
             return BadRequest("CNPJ invalido");
 
-        var company = _companyConnection.FindByCnpj(cnpj);
+        var company = await _companyConnection.FindByCnpjAsync(cnpj);
         if (company != null)
         {
             company.NameOptional = nameOpt;
@@ -266,11 +266,11 @@ public class CompanyController : ControllerBase
                 return BadRequest("O campo Street é obrigatorio");
         }
 
-        var company = _companyConnection.FindByCnpj(cnpj);
+        var company = await _companyConnection.FindByCnpjAsync(cnpj);
         if (company != null)
         {
             company.Address = address;
-            if (_companyConnection.Update(cnpj, company) != null)
+            if (_companyConnection.Update(cnpj, company) != false)
                 return Ok("Endereço da Companhia atualizado com sucesso!");
             else
                 return BadRequest("erro ao atualizar o endereço da Companhia");
@@ -291,7 +291,7 @@ public class CompanyController : ControllerBase
             return BadRequest("CNPJ invalido");
 
 
-        var company = _companyConnection.FindByCnpj(cnpj);
+        var company = await _companyConnection.FindByCnpjAsync(cnpj);
         if (company != null)
         {
             company.Status = !company.Status;
