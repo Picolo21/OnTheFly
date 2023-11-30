@@ -13,58 +13,64 @@ public class AirCraftConnection
         _database = client.GetDatabase("AirCraft");
     }
 
-    public AirCraft Insert(AirCraft airCraft)
+    public async Task<AirCraft> InsertAsync(AirCraft airCraft)
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-        collection.InsertOne(airCraft);
-        var res = collection.Find(a => a.Rab == airCraft.Rab).FirstOrDefault();
+        await collection.InsertOneAsync(airCraft);
+        var res = await collection.Find(a => a.Rab == airCraft.Rab).FirstOrDefaultAsync();
+
         return res;
     }
 
-    public List<AirCraft> FindAll()
+    public async Task<List<AirCraft>> FindAllAsync()
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-        return collection.Find<AirCraft>(a => true).ToList();
+
+        return await collection.Find<AirCraft>(a => true).ToListAsync();
     }
 
-    public AirCraft FindByRab(string rab)
+    public async Task<AirCraft> FindByRabAsync(string rab)
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-        var t= collection.Find(a => a.Rab == rab).FirstOrDefault();
-        return collection.Find(a => a.Rab == rab).FirstOrDefault();
+        var t = await collection.Find(a => a.Rab == rab).FirstOrDefaultAsync();
+
+        return await collection.Find(a => a.Rab == rab).FirstOrDefaultAsync();
     }
 
-    public AirCraft FindByRabDeleted(string rab)
+    public async Task<AirCraft >FindByRabDeletedAsync(string rab)
     {
         var collectionDeleted = _database.GetCollection<AirCraft>("DeletedAirCrafts");
-        return collectionDeleted.Find(a => a.Rab == rab).FirstOrDefault();
+
+        return await collectionDeleted.Find(a => a.Rab == rab).FirstOrDefaultAsync();
     }
 
-    public bool Delete(string rab)
+    public async Task<bool> DeleteAsync(string rab)
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
         var collectionDeleted = _database.GetCollection<AirCraft>("DeletedAirCrafts");
 
         var filter = Builders<AirCraft>.Filter.Eq("RAB", rab);
 
-        AirCraft? trash = collection.FindOneAndDelete(filter);
-        if (trash == null) return false;
+        AirCraft? trash = await collection.FindOneAndDeleteAsync(filter);
+        if (trash == null) 
+            return false;
 
-        collectionDeleted.InsertOne(trash);
+        await collectionDeleted.InsertOneAsync(trash);
         return true;
     }
 
-    public bool UndeleteAirCraft(string rab)
+    public async Task<bool> UndeleteAirCraftAsync(string rab)
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
         var collectionDeleted = _database.GetCollection<AirCraft>("DeletedAirCrafts");
 
         var filter = Builders<AirCraft>.Filter.Eq("RAB", rab);
 
-        AirCraft? trash = collectionDeleted.FindOneAndDelete(filter);
-        if (trash == null) return false;
+        AirCraft? trash = await collectionDeleted.FindOneAndDeleteAsync(filter);
+        if (trash == null) 
+            return false;
 
-        collection.InsertOne(trash);
+        await collection.InsertOneAsync(trash);
         return true;
     }
 
@@ -74,17 +80,18 @@ public class AirCraftConnection
         return collection.ReplaceOne(a => a.Rab == rab, airCraft).IsAcknowledged;
     }
 
-    public AirCraft? PatchDate(string rab, DateTime date)
+    public async Task<AirCraft?> PatchDateAsync(string rab, DateTime date)
     {
         var collection = _database.GetCollection<AirCraft>("ActivatedAirCrafts");
-        AirCraft? airCraft = collection.Find(a => a.Rab == rab).FirstOrDefault();
-        if (airCraft == null) return null;
+        AirCraft? airCraft = await collection.Find(a => a.Rab == rab).FirstOrDefaultAsync();
+        if (airCraft == null) 
+            return null;
 
         airCraft.DateLastFlight = date;
 
         var filter = Builders<AirCraft>.Filter.Eq("RAB", rab);
         var update = Builders<AirCraft>.Update.Set("DtLastFlight", date);
-        collection.UpdateOne(filter, update);
+        await collection.UpdateOneAsync(filter, update);
 
         return airCraft;
     }

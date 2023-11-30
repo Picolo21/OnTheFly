@@ -23,17 +23,17 @@ public class AirCraftController : ControllerBase
     [HttpGet(Name = "Get All Aircraft")]
     public async Task<ActionResult<List<AirCraft>>> GetAllAirCraftAsync()
     {
-        if (_airCraftConnection.FindAll().Count == 0)
+        if (_airCraftConnection.FindAllAsync().Equals(0))
         {
             return NotFound("Nenhum avião cadastrado");
         }
-        return _airCraftConnection.FindAll();
+        return await _airCraftConnection.FindAllAsync();
     }
 
     [HttpGet("{rab}", Name = "Get Aircraft by RAB")]
     public async Task<ActionResult<AirCraft>> GetAirCraftByRabAsync(string rab)
     {
-        return _airCraftConnection.FindByRab(rab);
+        return await _airCraftConnection.FindByRabAsync(rab);
     }
 
     [HttpPost(Name = "Create Aircraft")]
@@ -53,7 +53,7 @@ public class AirCraftController : ControllerBase
         if (!AirCraft.RabValidation(rab))
             return BadRequest("RAB inválido");
 
-        if (_airCraftConnection.FindByRab(rab) != null)
+        if (_airCraftConnection.FindByRabAsync(rab) != null)
             return BadRequest("O mesmo RAB já está registrado no banco");
         #endregion
 
@@ -95,9 +95,11 @@ public class AirCraftController : ControllerBase
             Rab = airCraftDto.Rab
         };
 
-        var insertAircraft = _airCraftConnection.Insert(airCraft);
+        var insertAircraft = await _airCraftConnection.InsertAsync(airCraft);
+
         if (insertAircraft != null)
             return Created("", "Inserido com sucesso!\n\n" + JsonConvert.SerializeObject(insertAircraft, Formatting.Indented));
+
         return BadRequest("Erro ao inserir avião!");
     }
 
@@ -113,10 +115,10 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        if (_airCraftConnection.FindByRab(rab) == null) 
+        if (_airCraftConnection.FindByRabAsync(rab) == null) 
             return BadRequest("Avião inexistente");
 
-        if (_airCraftConnection.Delete(rab))
+        if (await _airCraftConnection.DeleteAsync(rab))
             return Ok("Avião deletado com sucesso!");
 
         return BadRequest("Erro ao deletar avião");
@@ -134,10 +136,10 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        if (_airCraftConnection.FindByRabDeleted(rab) == null) 
+        if (_airCraftConnection.FindByRabDeletedAsync(rab) == null) 
             return BadRequest("Avião inexistente");
 
-        if (_airCraftConnection.UndeleteAirCraft(rab))
+        if (await _airCraftConnection.UndeleteAirCraftAsync(rab))
             return Ok("Avião retirado da lista dos deletados com sucesso!");
 
         return BadRequest("Erro ao retirar avião da lista dos deletados");
@@ -155,7 +157,7 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        AirCraft? aircraft = _airCraftConnection.FindByRab(rab);
+        AirCraft? aircraft = await _airCraftConnection.FindByRabAsync(rab);
         if (aircraft == null) return NotFound("Avião não encontrado");
 
         aircraft.Capacity = capacity;
@@ -192,7 +194,7 @@ public class AirCraftController : ControllerBase
             return BadRequest("RAB inválido");
         #endregion
 
-        AirCraft? aircraft = _airCraftConnection.FindByRab(rab);
+        AirCraft? aircraft = await _airCraftConnection.FindByRabAsync(rab);
         if (aircraft == null) 
             return NotFound("Avião não encontrado");
 
