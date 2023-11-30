@@ -13,50 +13,55 @@ public class PassengerConnection
         Database = client.GetDatabase("Passenger");
     }
 
-    public Passenger Insert(Passenger passenger)
+    public async Task<Passenger> InsertAsync(Passenger passenger)
     {
         var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
         collection.InsertOne(passenger);
-        var pass = collection.Find(p => p.Cpf == passenger.Cpf).FirstOrDefault();
-        return pass;
+        var passengerResult = await collection.Find(p => p.Cpf == passenger.Cpf).FirstOrDefaultAsync();
+
+        return passengerResult;
     }
 
-    public Passenger FindPassenger(string cpf)
+    public async Task<Passenger> FindPassengerAsync(string cpf)
     {
         var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
-        var passenger = collection.Find(c => c.Cpf == cpf).FirstOrDefault();
-        return passenger;
+        var passenger = await collection.Find(c => c.Cpf == cpf).FirstOrDefaultAsync();
 
+        return passenger;
     }
 
-    public Passenger FindPassengerRestrict(string cpf)
+    public async Task<Passenger> FindPassengerRestrictAsync(string cpf)
     {
         var collection = Database.GetCollection<Passenger>("RestrictedPassenger");
-        var RestrictedPassenger = collection.Find(p => p.Cpf == cpf).FirstOrDefault();
+        var RestrictedPassenger = await collection.Find(p => p.Cpf == cpf).FirstOrDefaultAsync();
+
         return RestrictedPassenger;
     }
 
-    public Passenger FindPassengerDeleted(string cpf)
+    public async Task<Passenger> FindPassengerDeletedAsync(string cpf)
     {
         var collection = Database.GetCollection<Passenger>("DeletedPassenger");
-        var deletedPassenger = collection.Find(p => p.Cpf == cpf).FirstOrDefault();
+        var deletedPassenger = await collection.Find(p => p.Cpf == cpf).FirstOrDefaultAsync();
+
         return deletedPassenger;
     }
 
-    public List<Passenger> FindAll()
+    public async Task<List<Passenger>> FindAllAsync()
     {
         var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
-        var passengers = collection.Find(p => true).ToList();
+        var passengers = await collection.Find(p => true).ToListAsync();
+
         return passengers;
     }
 
     public bool Update(string cpf, Passenger passenger)
     {
         var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
+
         return collection.ReplaceOne(p => p.Cpf == cpf, passenger).IsAcknowledged;
     }
 
-    public bool Delete(string cpf)
+    public async Task<bool> DeleteAsync(string cpf)
     {
         try
         {
@@ -64,23 +69,22 @@ public class PassengerConnection
             var collectionofdelete = Database.GetCollection<Passenger>("DeletedPassenger");
             var collectionofrestrict = Database.GetCollection<Passenger>("RestrictedPassenger");
 
-            var trash = collection.FindOneAndDelete(p => p.Cpf == cpf);
+            var trash = await collection.FindOneAndDeleteAsync(p => p.Cpf == cpf);
             if (trash == null)
             {
-                var trashRestricted = collectionofrestrict.FindOneAndDelete(p => p.Cpf == cpf);
+                var trashRestricted = await collectionofrestrict.FindOneAndDeleteAsync(p => p.Cpf == cpf);
+
                 if (trashRestricted == null)
-                {
                     return false;
-                }
                 else
                 {
-                    collectionofdelete.InsertOne(trashRestricted);
+                    await collectionofdelete.InsertOneAsync(trashRestricted);
                     return true;
                 }
             }
             else
             {
-                collectionofdelete.InsertOne(trash);
+                await collectionofdelete.InsertOneAsync(trash);
                 return true;
             }
         }
@@ -90,19 +94,23 @@ public class PassengerConnection
         }
     }
 
-    public bool Restrict(string cpf)
+    public async Task<bool> RestrictAsync(string cpf)
     {
         try
         {
             var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
             var collectionofrestrict = Database.GetCollection<Passenger>("RestrictedPassenger");
 
-            var passenger = collection.FindOneAndDelete(p => p.Cpf == cpf);
+            var passenger = await collection.FindOneAndDeleteAsync(p => p.Cpf == cpf);
+
             if (passenger == null)
                 return false;
-            collectionofrestrict.InsertOne(passenger);
-            if (collectionofrestrict.Find(p => p.Cpf == cpf).FirstOrDefault() != null)
+
+            await collectionofrestrict.InsertOneAsync(passenger);
+
+            if (collectionofrestrict.Find(p => p.Cpf == cpf).FirstOrDefaultAsync() != null)
                 return true;
+
             return false;
         }
         catch
@@ -111,20 +119,25 @@ public class PassengerConnection
         }
     }
 
-    public bool Unrestrict(string cpf)
+    public async Task<bool> UnrestrictAsync(string cpf)
     {
         try
         {
             var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
             var collectionofrestrict = Database.GetCollection<Passenger>("RestrictedPassenger");
 
-            var restrict = collectionofrestrict.FindOneAndDelete(p => p.Cpf == cpf);
+            var restrict = await collectionofrestrict.FindOneAndDeleteAsync(p => p.Cpf == cpf);
+
             if (restrict == null)
                 return false;
-            collection.InsertOne(restrict);
-            if (collection.Find(p => p.Cpf == cpf).FirstOrDefault() != null)
+
+            await collection.InsertOneAsync(restrict);
+
+            if (collection.Find(p => p.Cpf == cpf).FirstOrDefaultAsync() != null)
                 return true;
+
             return false;
+
         }
         catch
         {
@@ -132,19 +145,23 @@ public class PassengerConnection
         }
     }
 
-    public bool UndeletPassenger(string cpf)
+    public async Task<bool> UndeletPassengerAsync(string cpf)
     {
         try
         {
             var collection = Database.GetCollection<Passenger>("ActivatedPassenger");
             var collectionofdelete = Database.GetCollection<Passenger>("DeletedPassenger");
 
-            var delete = collectionofdelete.FindOneAndDelete(p => p.Cpf == cpf);
+            var delete = await collectionofdelete.FindOneAndDeleteAsync(p => p.Cpf == cpf);
+
             if (delete == null)
                 return false;
-            collection.InsertOne(delete);
-            if (collection.Find(p => p.Cpf == cpf).FirstOrDefault() != null)
+
+            await collection.InsertOneAsync(delete);
+
+            if (collection.Find(p => p.Cpf == cpf).FirstOrDefaultAsync() != null)
                 return true;
+
             return false;
         }
         catch

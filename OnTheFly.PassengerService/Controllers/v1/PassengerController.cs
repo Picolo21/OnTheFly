@@ -25,9 +25,11 @@ public class PassengerController : ControllerBase
     [HttpGet(Name = "Get All Passenger")]
     public async Task<ActionResult<List<Passenger>>> GetAllPassengerAsync()
     {
-        var passengers = _passengerConnection.FindAll();
+        var passengers = await _passengerConnection.FindAllAsync();
+
         if (passengers.Count == 0)
             return NotFound("Nenhum passageiro encontrado");
+
         return passengers;
     }
 
@@ -38,10 +40,11 @@ public class PassengerController : ControllerBase
             return BadRequest("CPF não informado!");
 
         cpf = cpf.Replace(".", "").Replace("-", "");
+
         if (Passenger.ValidateCpf(cpf) == false)
             return BadRequest("CPF invalido");
 
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
 
         if (passenger == null)
             return NotFound("Passageiro com este cpf nao encontrado");
@@ -60,13 +63,13 @@ public class PassengerController : ControllerBase
         if (Passenger.ValidateCpf(cpf) == false)
             return BadRequest("CPF invalido");
 
-        if (_passengerConnection.FindPassengerRestrict(passengerDto.Cpf) != null)
+        if (_passengerConnection.FindPassengerRestrictAsync(passengerDto.Cpf) != null)
             return BadRequest("Passageiro restrito!!");
 
-        if (_passengerConnection.FindPassengerDeleted(passengerDto.Cpf) != null)
+        if (_passengerConnection.FindPassengerDeletedAsync(passengerDto.Cpf) != null)
             return BadRequest("Impossivel inserir este passageiro");
 
-        if (_passengerConnection.FindPassenger(passengerDto.Cpf) != null)
+        if (_passengerConnection.FindPassengerAsync(passengerDto.Cpf) != null)
             return Conflict("Passageiro ja cadastrado");
 
         DateTime date;
@@ -121,7 +124,7 @@ public class PassengerController : ControllerBase
             Status = passengerDto.Status
         };
 
-        var insertPassenger = _passengerConnection.Insert(passenger);
+        var insertPassenger = await _passengerConnection.InsertAsync(passenger);
         if (insertPassenger != null)
             return Created("", "Inserido com sucesso!\n\n" + JsonConvert.SerializeObject(insertPassenger, Formatting.Indented));
 
@@ -140,9 +143,9 @@ public class PassengerController : ControllerBase
         if (!Passenger.ValidateCpf(cpf))
             return BadRequest("CPF invalido");
 
-        if (_passengerConnection.FindPassenger(cpf) != null || _passengerConnection.FindPassengerRestrict(cpf) != null)
+        if (_passengerConnection.FindPassengerAsync(cpf) != null || _passengerConnection.FindPassengerRestrictAsync(cpf) != null)
         {
-            if (_passengerConnection.Delete(cpf))
+            if (await _passengerConnection.DeleteAsync(cpf))
                 return Ok("Passageiro deletado com sucesso!");
             else
                 return BadRequest("erro ao deletar");
@@ -161,9 +164,9 @@ public class PassengerController : ControllerBase
         if (!Passenger.ValidateCpf(cpf))
             return BadRequest("CPF invalido");
 
-        if (_passengerConnection.FindPassenger(cpf) != null)
+        if (_passengerConnection.FindPassengerAsync(cpf) != null)
         {
-            if (_passengerConnection.Restrict(cpf))
+            if (await _passengerConnection.RestrictAsync(cpf))
                 return Ok("Passageiro restrito com sucesso!");
             else
                 return BadRequest("erro ao restringir");
@@ -182,9 +185,9 @@ public class PassengerController : ControllerBase
         if (!Passenger.ValidateCpf(cpf))
             return BadRequest("CPF invalido");
 
-        if (_passengerConnection.FindPassengerRestrict(cpf) != null)
+        if (_passengerConnection.FindPassengerRestrictAsync(cpf) != null)
         {
-            if (_passengerConnection.Unrestrict(cpf))
+            if (await _passengerConnection.UnrestrictAsync(cpf))
                 return Ok("Passageiro retirado da lista de restritos com sucesso!");
             else
                 return BadRequest("erro ao retirar da lista de restritos");
@@ -203,9 +206,9 @@ public class PassengerController : ControllerBase
         if (!Passenger.ValidateCpf(cpf))
             return BadRequest("CPF invalido");
 
-        if (_passengerConnection.FindPassengerDeleted(cpf) != null)
+        if (_passengerConnection.FindPassengerDeletedAsync(cpf) != null)
         {
-            if (_passengerConnection.UndeletPassenger(cpf))
+            if (await _passengerConnection.UndeletPassengerAsync(cpf))
                 return Ok("Passageiro retirado da lista de deletados com sucesso!");
             else
                 return BadRequest("erro ao retirar da lista de deletados");
@@ -224,10 +227,12 @@ public class PassengerController : ControllerBase
         if (!Passenger.ValidateCpf(cpf))
             return BadRequest("CPF invalido");
 
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
+
         if (passenger != null)
         {
             passenger.Name = name;
+
             if (_passengerConnection.Update(cpf, passenger))
                 return Ok("Nome do Passageiro atualizado com sucesso!");
             else
@@ -251,7 +256,7 @@ public class PassengerController : ControllerBase
         if (gender.Length != 1)
             return BadRequest("O campo genero aceita apenas um caractere");
 
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
         if (passenger != null)
         {
             passenger.Gender = gender;
@@ -278,7 +283,7 @@ public class PassengerController : ControllerBase
         if (phone.Length > 14)
             return BadRequest("Digite um telefone valido");
 
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
         if (passenger != null)
         {
             passenger.Phone = phone;
@@ -311,7 +316,7 @@ public class PassengerController : ControllerBase
         {
             return BadRequest("Data invalida");
         }
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
         if (passenger != null)
         {
             passenger.DateBirth = date;
@@ -356,7 +361,7 @@ public class PassengerController : ControllerBase
                 return BadRequest("O campo Street é obrigatorio");
         }
 
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
         if (passenger != null)
         {
             passenger.Address = address;
@@ -381,7 +386,7 @@ public class PassengerController : ControllerBase
             return BadRequest("CPF invalido");
 
 
-        var passenger = _passengerConnection.FindPassenger(cpf);
+        var passenger = await _passengerConnection.FindPassengerAsync(cpf);
         if (passenger != null)
         {
             passenger.Status = !passenger.Status;
